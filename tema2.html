@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial Angular 19: Parte 2 - Signals, Inputs y Outputs</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 0;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        nav {
+            position: fixed;
+            left: 0;
+            top: 80px;
+            width: 250px;
+            height: calc(100vh - 80px);
+            background: white;
+            overflow-y: auto;
+            padding: 1rem 0;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        nav ul {
+            list-style: none;
+            padding: 0;
+        }
+        nav li {
+            padding: 0.5rem 1rem;
+        }
+        nav a {
+            text-decoration: none;
+            color: #333;
+            display: block;
+            transition: background 0.3s;
+        }
+        nav a:hover {
+            background: #f0f0f0;
+            border-right: 3px solid #667eea;
+        }
+        main {
+            margin-left: 250px;
+            padding: 2rem;
+            max-width: 1000px;
+        }
+        section {
+            margin-bottom: 3rem;
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            animation: fadeInUp 0.8s ease-out;
+        }
+        h1, h2, h3 {
+            color: #667eea;
+        }
+        .step-icon {
+            display: inline-block;
+            margin-right: 0.5rem;
+            color: #667eea;
+            animation: bounce 1s infinite alternate;
+        }
+        ol {
+            counter-reset: step-counter;
+        }
+        ol li {
+            counter-increment: step-counter;
+            position: relative;
+            padding-left: 2rem;
+        }
+        ol li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #667eea;
+            color: white;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+        pre {
+            background: #2d3748;
+            border-radius: 5px;
+            padding: 1rem;
+            overflow-x: auto;
+        }
+        code {
+            font-family: 'Courier New', monospace;
+        }
+        .icon-novel {
+            font-size: 2rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+            animation: pulse 2s infinite;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-5px); }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        @media (max-width: 768px) {
+            nav { width: 100%; position: relative; height: auto; }
+            main { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1><i class="fas fa-code"></i> Tutorial Angular 19: Parte 2 - Signals, Inputs y Outputs</h1>
+    <p>Continuación del proyecto: Hacia componentes más reactivos y flexibles</p>
+</header>
+<nav>
+    <ul>
+        <li><a href="#signals-intro"><i class="fas fa-signal"></i> Introducción a Signals</a></li>
+        <li><a href="#flexible-components"><i class="fas fa-cogs"></i> Componentes más Flexibles</a></li>
+        <li><a href="#defining-inputs"><i class="fas fa-arrow-down"></i> Definiendo Inputs</a></li>
+        <li><a href="#required-optional"><i class="fas fa-toggle-on"></i> Inputs Obligatorios y Opcionales</a></li>
+        <li><a href="#signal-inputs"><i class="fas fa-plug"></i> Usar Entradas de Signals</a></li>
+        <li><a href="#custom-events"><i class="fas fa-bullhorn"></i> Eventos Personalizados</a></li>
+        <li><a href="#using-outputs"><i class="fas fa-share"></i> Usar Outputs y Emitir</a></li>
+        <li><a href="#output-function"><i class="fas fa-function"></i> Función Output()</a></li>
+        <li><a href="#eventemitter-type"><i class="fas fa-type"></i> Tipado en EventEmitter</a></li>
+        <li><a href="#exercise"><i class="fas fa-tasks"></i> Ejercicio: Componente Configurable</a></li>
+    </ul>
+</nav>
+<main>
+    <section id="signals-intro" class="animate__animated animate__fadeIn">
+        <h1 class="icon-novel"><i class="fas fa-signal"></i> Introducción a Signals en Angular</h1>
+        <p><strong>Concepto:</strong> Los Signals son un sistema de reactividad granular que envuelve valores y notifica a los consumidores cuando cambian, optimizando las actualizaciones de renderizado en Angular.<grok-card data-id="f7093d" data-type="citation_card"></grok-card></p>
+        <p><strong>¿Qué es?</strong> Un wrapper alrededor de un valor (primitivos o complejos) que permite a Angular rastrear dependencias dinámicamente para actualizaciones eficientes.</p>
+        <p><strong>Explicación detallada:</strong> Los Signals permiten un seguimiento preciso del estado, reduciendo re-renderizados innecesarios. En Angular 19, se integran más profundamente con operaciones asíncronas experimentales, pero el núcleo permanece igual.<grok-card data-id="2f28a7" data-type="citation_card"></grok-card></p>
+        <ol>
+            <li>Crear un Signal writable: <code>const count = signal(0);</code></li>
+            <li>Leer: <code>count()</code>.</li>
+            <li>Actualizar: <code>count.set(1)</code> o <code>count.update(v => v + 1)</code>.</li>
+        </ol>
+        <pre><code class="language-typescript">import { signal } from '@angular/core';
+
+const count = signal(0);
+console.log(count()); // 0
+count.set(1);
+console.log(count()); // 1</code></pre>
+        <p><strong>Aplicación al proyecto:</strong> En nuestro perfil de usuario, usaremos Signals para el estado dinámico del usuario.</p>
+    </section>
+
+    <section id="flexible-components">
+        <h2><i class="fas fa-cogs step-icon"></i> Necesitamos Componentes más Flexibles</h2>
+        <p><strong>Concepto:</strong> Los componentes deben recibir datos de padres y emitir eventos para comunicación unidireccional, haciendo la app modular y reutilizable.</p>
+        <p><strong>¿Qué es?</strong> Mecanismos como Inputs y Outputs para pasar datos y manejar interacciones sin acoplamiento directo.</p>
+        <p><strong>Explicación:</strong> En el proyecto, haremos el componente UserProfile configurable vía Inputs (e.g., nombre, edad) y Outputs (e.g., evento de edición).</p>
+    </section>
+
+    <section id="defining-inputs">
+        <h2><i class="fas fa-arrow-down step-icon"></i> Definiendo las Entradas (Inputs) de los Componentes en Angular</h2>
+        <p><strong>Concepto:</strong> Inputs permiten que componentes padres pasen datos a hijos, similar a props.</p>
+        <p><strong>¿Qué es?</strong> Propiedades declaradas con <code>input()</code> que se bindan en templates con []<grok-card data-id="510f81" data-type="citation_card"></grok-card></p>
+        <p><strong>Explicación detallada del código:</strong> Se declaran en inicializadores de propiedades del componente. Angular las registra en compile-time.</p>
+        <pre><code class="language-typescript">import { Component, input } from '@angular/core';
+
+@Component({...})
+export class UserProfileComponent {
+  name = input('Usuario por defecto'); // Input opcional con default
+}</code></pre>
+        <p>En template padre: <code>&lt;app-user-profile [name]="user.name"&gt;&lt;/app-user-profile&gt;</code></p>
+        <p><strong>Aplicación:</strong> En UserProfile, input para 'name' desde AppComponent.</p>
+    </section>
+
+    <section id="required-optional">
+        <h2><i class="fas fa-toggle-on step-icon"></i> Inputs Obligatorios (Required) y Opcionales en Angular</h2>
+        <p><strong>Concepto:</strong> Inputs opcionales tienen defaults o undefined; obligatorios requieren binding explícito.</p>
+        <p><strong>¿Qué es?</strong> Configuración vía <code>input()</code> con o sin valor default.</p>
+        <p><strong>Explicación:</strong> Sin default, es <code>InputSignal&lt;T | undefined&gt;</code>; con default, <code>InputSignal&lt;T&gt;</code><grok-card data-id="03d488" data-type="citation_card"></grok-card></p>
+        <pre><code class="language-typescript">// Opcional con default
+age = input(25);
+
+// Obligatorio (sin default, tipo explícito)
+name = input&lt;string&gt;();
+if (!this.name()) { /* Error handling */ }</code></pre>
+        <p><strong>Aplicación al proyecto:</strong> Haz 'age' opcional con default 18, 'name' obligatorio.</p>
+    </section>
+
+    <section id="signal-inputs">
+        <h2><i class="fas fa-plug step-icon"></i> Usar Entradas de Signals en Angular</h2>
+        <p><strong>Concepto:</strong> Inputs son Signals, integrándose con el sistema reactivo.</p>
+        <p><strong>¿Qué es?</strong> <code>input()</code> retorna un Signal legible como <code>this.name()</code>.</p>
+        <p><strong>Explicación detallada:</strong> Se leen en templates o computed/effects para reactividad automática<grok-card data-id="dfd3af" data-type="citation_card"></grok-card></p>
+        <pre><code class="language-typescript">import { computed } from '@angular/core';
+
+get fullName() {
+  return computed(() => `Hola, ${this.name()}!`);
+}</code></pre>
+        <p>En template: <code>&lt;p&gt;{{fullName()}}&lt;/p&gt;</code></p>
+        <p><strong>Aplicación:</strong> Usa en UserProfile para mostrar nombre dinámico.</p>
+    </section>
+
+    <section id="custom-events">
+        <h2><i class="fas fa-bullhorn step-icon"></i> Eventos Personalizados en Angular</h2>
+        <p><strong>Concepto:</strong> Outputs permiten que hijos notifiquen a padres de cambios.</p>
+        <p><strong>¿Qué es?</strong> Eventos custom que no burbujean, declarados con <code>output()</code><grok-card data-id="9b6a27" data-type="citation_card"></grok-card></p>
+        <p><strong>Explicación:</strong> Bind en template con ().</p>
+    </section>
+
+    <section id="using-outputs">
+        <h2><i class="fas fa-share step-icon"></i> Usar Outputs y Emitir Información en Angular</h2>
+        <p><strong>Concepto:</strong> Outputs emiten eventos con datos opcionales.</p>
+        <p><strong>¿Qué es?</strong> <code>OutputEmitterRef</code> para emitir via <code>emit()</code>.</p>
+        <p><strong>Explicación detallada del código:</strong> Declara y emite en métodos<grok-card data-id="38e3b2" data-type="citation_card"></grok-card></p>
+        <pre><code class="language-typescript">import { Component, output } from '@angular/core';
+
+@Component({...})
+export class UserProfileComponent {
+  userEdited = output&lt;{name: string; age: number}&gt;();
+
+  onEdit(userData: {name: string; age: number}) {
+    this.userEdited.emit(userData);
+  }
+}</code></pre>
+        <p>En padre: <code>&lt;app-user-profile (userEdited)="updateUser($event)"&gt;&lt;/app-user-profile&gt;</code></p>
+        <p><strong>Aplicación:</strong> Emite cambios de perfil al AppComponent.</p>
+    </section>
+
+    <section id="output-function">
+        <h2><i class="fas fa-function step-icon"></i> Usar la Función Output() en Angular</h2>
+        <p><strong>Concepto:</strong> <code>output()</code> crea Outputs modernos, preferidos sobre @Output.</p>
+        <p><strong>¿Qué es?</strong> Función que retorna OutputEmitterRef para emitir eventos.</p>
+        <p><strong>Explicación:</strong> Llamada en inicializadores; hereda en subclases<grok-card data-id="91d63a" data-type="citation_card"></grok-card></p>
+        <pre><code class="language-typescript">profileUpdated = output();
+
+updateProfile() {
+  this.profileUpdated.emit();
+}</code></pre>
+    </section>
+
+    <section id="eventemitter-type">
+        <h2><i class="fas fa-type step-icon"></i> Agregar Información Adicional de Tipo a EventEmitter en Angular</h2>
+        <p><strong>Concepto:</strong> Tipado genérico para payloads en emits.</p>
+        <p><strong>¿Qué es?</strong> <code>output&lt;T&gt;()</code> donde T es el tipo del evento.</p>
+        <p><strong>Explicación detallada:</strong> Alternativa con @Output y EventEmitter&lt;T&gt; para compatibilidad<grok-card data-id="afc6ab" data-type="citation_card"></grok-card></p>
+        <pre><code class="language-typescript">// Con output()
+edited = output&lt;User&gt;();
+
+// O con decorator (legacy)
+@Output() edited = new EventEmitter&lt;User&gt;();
+
+editUser(user: User) {
+  this.edited.emit(user);
+}</code></pre>
+        <p><strong>Aplicación:</strong> Tipa el evento con interfaz User del proyecto anterior.</p>
+    </section>
+
+    <section id="exercise">
+        <h2><i class="fas fa-tasks step-icon"></i> Ejercicio: Crea un Componente Configurable en Angular</h2>
+        <p><strong>Concepto:</strong> Integra Inputs y Outputs para un componente reutilizable.</p>
+        <p><strong>¿Qué es?</strong> Un UserCard que recibe user data vía Inputs y emite onSelect.</p>
+        <p><strong>Pasos detallados:</strong></p>
+        <ol>
+            <li>Genera: <code>ng g c user-card</code></li>
+            <li>En user-card.component.ts: Agrega Inputs para name (req), age (opt=18), y Output onSelect&lt;User&gt;().</li>
+            <li>En template: Muestra {{name()}} y botón (click)="selectUser()".</li>
+            <li>En selectUser(): <code>this.onSelect.emit({name: this.name(), age: this.age()})</code></li>
+            <li>En app.component.html: &lt;app-user-card [name]="user.name" [age]="user.age" (onSelect)="handleSelect($event)"&gt;&lt;/app-user-card&gt;</li>
+            <li>En handleSelect: console.log(event).</li>
+        </ol>
+        <pre><code class="language-typescript">// user-card.component.ts
+import { Component, input, output } from '@angular/core';
+import { User } from '../user'; // Asume interfaz User
+
+@Component({
+  selector: 'app-user-card',
+  template: `
+    &lt;p&gt;{{name()}} - {{age()}} años&lt;/p&gt;
+    &lt;button (click)="selectUser()"&gt;Seleccionar&lt;/button&gt;
+  `
+})
+export class UserCardComponent {
+  name = input.required&lt;string&gt;();
+  age = input(18);
+  onSelect = output&lt;User&gt;();
+
+  selectUser() {
+    this.onSelect.emit({ name: this.name(), age: this.age() });
+  }
+}</code></pre>
+        <p><strong>Explicación:</strong> Esto hace el componente flexible: configurable vía props, reactivo con Signals, y comunicativo vía eventos. Prueba en ng serve.</p>
+    </section>
+</main>
+<script>
+    // Smooth scroll for nav links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+    Prism.highlightAll();
+</script>
+</body>
+</html>

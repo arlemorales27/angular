@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial Profesional de Angular 19: Construyendo un Proyecto Paso a Paso</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 0;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        nav {
+            position: fixed;
+            left: 0;
+            top: 80px;
+            width: 250px;
+            height: calc(100vh - 80px);
+            background: white;
+            overflow-y: auto;
+            padding: 1rem 0;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        nav ul {
+            list-style: none;
+            padding: 0;
+        }
+        nav li {
+            padding: 0.5rem 1rem;
+        }
+        nav a {
+            text-decoration: none;
+            color: #333;
+            display: block;
+            transition: background 0.3s;
+        }
+        nav a:hover {
+            background: #f0f0f0;
+            border-right: 3px solid #667eea;
+        }
+        main {
+            margin-left: 250px;
+            padding: 2rem;
+            max-width: 1000px;
+        }
+        section {
+            margin-bottom: 3rem;
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            animation: fadeInUp 0.8s ease-out;
+        }
+        h1, h2, h3 {
+            color: #667eea;
+        }
+        .step-icon {
+            display: inline-block;
+            margin-right: 0.5rem;
+            color: #667eea;
+            animation: bounce 1s infinite alternate;
+        }
+        ol {
+            counter-reset: step-counter;
+        }
+        ol li {
+            counter-increment: step-counter;
+            position: relative;
+            padding-left: 2rem;
+        }
+        ol li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #667eea;
+            color: white;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+        pre {
+            background: #2d3748;
+            border-radius: 5px;
+            padding: 1rem;
+            overflow-x: auto;
+        }
+        code {
+            font-family: 'Courier New', monospace;
+        }
+        .icon-novel {
+            font-size: 2rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+            animation: pulse 2s infinite;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-5px); }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        @media (max-width: 768px) {
+            nav { width: 100%; position: relative; height: auto; }
+            main { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1><i class="fas fa-code"></i> Tutorial Angular 19: Proyecto Paso a Paso</h1>
+    <p>Aprende Angular 19, HTML5, CSS3 y JavaScript con un proyecto práctico</p>
+</header>
+<nav>
+    <ul>
+        <li><a href="#intro"><i class="fas fa-home"></i> ¿Qué es Angular?</a></li>
+        <li><a href="#install"><i class="fas fa-download"></i> Instalación</a></li>
+        <li><a href="#create"><i class="fas fa-plus"></i> Crear Proyecto</a></li>
+        <li><a href="#structure"><i class="fas fa-folder-open"></i> Estructura del Proyecto</a></li>
+        <li><a href="#components"><i class="fas fa-puzzle-piece"></i> Componentes en Angular</a></li>
+        <li><a href="#first-component"><i class="fas fa-cogs"></i> Primer Componente</a></li>
+        <li><a href="#config-component"><i class="fas fa-wrench"></i> Configurar Componente</a></li>
+        <li><a href="#use-component"><i class="fas fa-play"></i> Usar Componente</a></li>
+        <li><a href="#style-header"><i class="fas fa-paint-brush"></i> Estilo Header e Imagen</a></li>
+        <li><a href="#cli-components"><i class="fas fa-terminal"></i> Componentes con CLI</a></li>
+        <li><a href="#next-component"><i class="fas fa-arrow-right"></i> Siguiente Componente</a></li>
+        <li><a href="#user-info"><i class="fas fa-user"></i> Información del Usuario</a></li>
+        <li><a href="#store-info"><i class="fas fa-database"></i> Almacenar Información</a></li>
+        <li><a href="#dynamic-content"><i class="fas fa-magic"></i> Contenido Dinámico</a></li>
+        <li><a href="#property-binding"><i class="fas fa-link"></i> Vinculación de Propiedades</a></li>
+        <li><a href="#attribute-binding"><i class="fas fa-tag"></i> Vinculación de Atributos</a></li>
+        <li><a href="#getters"><i class="fas fa-calculator"></i> Getters</a></li>
+        <li><a href="#events"><i class="fas fa-ear"></i> Escuchar Eventos</a></li>
+        <li><a href="#state"><i class="fas fa-sync"></i> Gestionar Estado</a></li>
+    </ul>
+</nav>
+<main>
+    <section id="intro" class="animate__animated animate__fadeIn">
+        <h1 class="icon-novel"><i class="fas fa-rocket"></i> ¿Qué es Angular?</h1>
+        <p>Angular es un framework web que empodera a los desarrolladores para construir aplicaciones rápidas y confiables.<grok-card data-id="778449" data-type="citation_card"></grok-card> Es una plataforma de desarrollo construida sobre TypeScript, que incluye un framework basado en componentes para crear aplicaciones web escalables.<grok-card data-id="fffbdc" data-type="citation_card"></grok-card> Mantenido por un equipo dedicado en Google, ofrece herramientas, APIs y bibliotecas para simplificar el flujo de trabajo de desarrollo.</p>
+        <p><strong>Concepto:</strong> Angular es un framework de frontend para SPAs (Single Page Applications).</p>
+        <p><strong>¿Qué es?</strong> Una plataforma completa para apps web modernas.</p>
+    </section>
+
+    <section id="install">
+        <h2><i class="fas fa-download step-icon"></i> ¿Qué debo instalar?</h2>
+        <p>Para comenzar con Angular 19, necesitas Node.js (versión 18 o superior) y el Angular CLI.</p>
+        <ol>
+            <li>Instala Node.js desde <a href="https://nodejs.org">nodejs.org</a>.</li>
+            <li>Instala el CLI globalmente: <code>npm install -g @angular/cli</code><grok-card data-id="25ef1e" data-type="citation_card"></grok-card></li>
+        </ol>
+        <pre><code class="language-bash">npm install -g @angular/cli</code></pre>
+        <p><strong>Explicación:</strong> El CLI es la herramienta de línea de comandos para generar y gestionar proyectos Angular.</p>
+    </section>
+
+    <section id="create">
+        <h2><i class="fas fa-plus step-icon"></i> ¿Cómo se crea un proyecto?</h2>
+        <ol>
+            <li>Ejecuta: <code>ng new mi-proyecto-angular</code></li>
+            <li>Selecciona opciones (routing: yes, styles: CSS).</li>
+            <li>Entra al directorio: <code>cd mi-proyecto-angular</code></li>
+            <li>Sirve la app: <code>ng serve</code></li>
+        </ol>
+        <pre><code class="language-bash">ng new mi-proyecto-angular
+cd mi-proyecto-angular
+ng serve</code></pre>
+        <p><strong>Explicación detallada:</strong> <code>ng new</code> genera la estructura básica, instala dependencias y crea un app inicial. <code>ng serve</code> compila y sirve en localhost:4200.</p>
+    </section>
+
+    <section id="structure">
+        <h2><i class="fas fa-folder-open step-icon"></i> La Estructura de un Proyecto Angular</h2>
+        <p>El proyecto se organiza en un workspace con carpetas clave en <code>src/</code>.<grok-card data-id="0371fd" data-type="citation_card"></grok-card></p>
+        <ul>
+            <li><code>app/</code>: Componentes, módulos, servicios.</li>
+            <li><code>assets/</code>: Imágenes, fuentes.</li>
+            <li><code>environments/</code>: Configuraciones.</li>
+            <li><code>main.ts</code>: Punto de entrada.</li>
+            <li><code>index.html</code>: Plantilla base.</li>
+        </ul>
+        <p><strong>Concepto:</strong> Estructura modular para escalabilidad.</p>
+        <p><strong>Explicación:</strong> El CLI crea un esqueleto listo para desarrollo, con archivos TypeScript, HTML y CSS.</p>
+    </section>
+
+    <section id="components">
+        <h2><i class="fas fa-puzzle-piece step-icon"></i> Componentes en Angular y Cómo Llega el Contenido a la Pantalla</h2>
+        <p>Los componentes son bloques de construcción que controlan una porción de la pantalla. El contenido llega vía detección de cambios: Angular actualiza la vista cuando el modelo cambia.</p>
+        <p><strong>Concepto:</strong> Un componente encapsula template, lógica y estilos.</p>
+        <p><strong>¿Qué es?</strong> Clase TS con decorator @Component.</p>
+        <pre><code class="language-typescript">import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-example',
+  template: '<h1>Hola</h1>',
+})
+export class ExampleComponent {}</code></pre>
+        <p><strong>Explicación:</strong> El template se renderiza en el DOM cuando el selector se usa en otro template.</p>
+    </section>
+
+    <section id="first-component">
+        <h2><i class="fas fa-cogs step-icon"></i> Crear el Primer Componente Personalizado en Angular</h2>
+        <p>En nuestro proyecto de perfil de usuario, creamos un componente header.</p>
+        <ol>
+            <li>Ejecuta: <code>ng generate component header</code></li>
+        </ol>
+        <pre><code class="language-bash">ng g c header</code></pre>
+        <p><strong>Explicación del código:</strong> Genera <code>header.component.ts</code>, <code>.html</code>, <code>.css</code> e <code>.spec.ts</code>. La clase define la lógica.</p>
+    </section>
+
+    <section id="config-component">
+        <h2><i class="fas fa-wrench step-icon"></i> Configurar el Componente Personalizado en Angular</h2>
+        <p>Declara el componente en <code>app.module.ts</code> (automático con CLI).</p>
+        <pre><code class="language-typescript">import { HeaderComponent } from './header/header.component';
+
+@NgModule({
+  declarations: [AppComponent, HeaderComponent],
+  // ...
+})</code></pre>
+        <p><strong>Explicación:</strong> Las declaraciones registran el componente para uso en el módulo.</p>
+    </section>
+
+    <section id="use-component">
+        <h2><i class="fas fa-play step-icon"></i> Usar el Componente Personalizado en Angular</h2>
+        <p>Inserta el selector en <code>app.component.html</code>.</p>
+        <pre><code class="language-html">&lt;app-header&gt;&lt;/app-header&gt;
+&lt;router-outlet&gt;&lt;/router-outlet&gt;</code></pre>
+        <p><strong>Explicación detallada:</strong> Angular renderiza el template del header cuando encuentra &lt;app-header&gt;.</p>
+    </section>
+
+    <section id="style-header">
+        <h2><i class="fas fa-paint-brush step-icon"></i> Dar Estilo al Componente Header y Agregar una Imagen en Angular</h2>
+        <p>En <code>header.component.css</code>:</p>
+        <pre><code class="language-css">h1 { color: #667eea; }
+img { width: 100px; border-radius: 50%; }</code></pre>
+        <p>En <code>header.component.html</code>:</p>
+        <pre><code class="language-html">&lt;h1&gt;Perfil de Usuario&lt;/h1&gt;
+&lt;img src="assets/user.jpg" alt="Usuario"&gt;</code></pre>
+        <p><strong>Explicación:</strong> Estilos encapsulados, imagen de assets/.</p>
+    </section>
+
+    <section id="cli-components">
+        <h2><i class="fas fa-terminal step-icon"></i> Gestionar y Crear Componentes con Angular CLI</h2>
+        <p>Usa CLI para eficiencia.</p>
+        <pre><code class="language-bash">ng generate component user-profile --skip-tests</code></pre>
+        <p><strong>Concepto:</strong> Automatiza boilerplate.</p>
+    </section>
+
+    <section id="next-component">
+        <h2><i class="fas fa-arrow-right step-icon"></i> Dar Estilo y Usar el Siguiente Componente Personalizado en Angular</h2>
+        <p>Crea user-profile, estilo similar, úsalo en app.component.html: &lt;app-user-profile&gt;&lt;/app-user-profile&gt;.</p>
+        <p><strong>Explicación:</strong> Reutiliza patrones para modularidad.</p>
+    </section>
+
+    <section id="user-info">
+        <h2><i class="fas fa-user step-icon"></i> Preparar la Información del Usuario (para mostrar contenido dinámico) en Angular</h2>
+        <p>Define interfaz en <code>user.ts</code>:</p>
+        <pre><code class="language-typescript">export interface User {
+  name: string;
+  age: number;
+}</code></pre>
+        <p><strong>¿Qué es?</strong> TypeScript para tipado fuerte.</p>
+    </section>
+
+    <section id="store-info">
+        <h2><i class="fas fa-database step-icon"></i> Almacenar Información en la Clase de un Componente en Angular</h2>
+        <p>En <code>user-profile.component.ts</code>:</p>
+        <pre><code class="language-typescript">export class UserProfileComponent {
+  user: User = { name: 'Juan', age: 30 };
+}</code></pre>
+        <p><strong>Explicación:</strong> Propiedades de clase almacenan estado.</p>
+    </section>
+
+    <section id="dynamic-content">
+        <h2><i class="fas fa-magic step-icon"></i> Mostrar Contenido Dinámico con Interpolación de Cadenas en Angular</h2>
+        <p>En template:</p>
+        <pre><code class="language-html">&lt;p&gt;Hola, {{user.name}}! Tienes {{user.age}} años.&lt;/p&gt;</code></pre>
+        <p><strong>Concepto:</strong> {{ }} inserta valores del componente.<grok-card data-id="f90206" data-type="citation_card"></grok-card></p>
+    </section>
+
+    <section id="property-binding">
+        <h2><i class="fas fa-link step-icon"></i> Vinculación de Propiedades y Mostrar Valores Calculados en Angular</h2>
+        <p>Propiedad: <code>[src]="imageUrl"</code></p>
+        <p>Calculado: Usa getter.</p>
+        <pre><code class="language-html">&lt;button [disabled]="!user.active"&gt;Activar&lt;/button&gt;</code></pre>
+        <p><strong>Explicación:</strong> [] une propiedades del DOM a expresiones.<grok-card data-id="27e854" data-type="citation_card"></grok-card></p>
+    </section>
+
+    <section id="attribute-binding">
+        <h2><i class="fas fa-tag step-icon"></i> Vinculación de Atributos en Angular</h2>
+        <pre><code class="language-html">&lt;img [attr.alt]="'Foto de ' + user.name"&gt;</code></pre>
+        <p><strong>Explicación:</strong> attr. para atributos HTML dinámicos.<grok-card data-id="d717c3" data-type="citation_card"></grok-card></p>
+    </section>
+
+    <section id="getters">
+        <h2><i class="fas fa-calculator step-icon"></i> Usar Getters para Valores Calculados en Angular</h2>
+        <pre><code class="language-typescript">get fullInfo() {
+  return `${this.user.name} (${this.user.age} años)`;
+}</code></pre>
+        <pre><code class="language-html">&lt;p&gt;{{fullInfo}}&lt;/p&gt;</code></pre>
+        <p><strong>Explicación:</strong> Getters computan en tiempo real.</p>
+    </section>
+
+    <section id="events">
+        <h2><i class="fas fa-ear step-icon"></i> Escuchar Eventos con Vinculación de Eventos en Angular</h2>
+        <pre><code class="language-html">&lt;button (click)="updateAge()"&gt;Cumpleaños&lt;/button&gt;</code></pre>
+        <pre><code class="language-typescript">updateAge() {
+  this.user.age++;
+}</code></pre>
+        <p><strong>Concepto:</strong> () une eventos a métodos.<grok-card data-id="c7012e" data-type="citation_card"></grok-card></p>
+    </section>
+
+    <section id="state">
+        <h2><i class="fas fa-sync step-icon"></i> Gestionar el Estado y Modificar Datos en Angular</h2>
+        <p>Usa métodos para mutar estado, lifecycle hooks para timing.<grok-card data-id="05e3d4" data-type="citation_card"></grok-card></p>
+        <pre><code class="language-typescript">ngOnInit() {
+  // Inicializar estado
+}
+
+updateState() {
+  this.user.name = 'Nuevo Nombre';
+}</code></pre>
+        <p><strong>Explicación detallada:</strong> ngOnInit para init, ngOnChanges para inputs. Evita leaks en ngOnDestroy.</p>
+    </section>
+</main>
+<script>
+    // Smooth scroll for nav links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+</script>
+</body>
+</html>
