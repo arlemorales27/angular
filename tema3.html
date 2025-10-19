@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial Angular 19: Parte 3 - TypeScript Avanzado, Listas y Condicionales</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 0;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        nav {
+            position: fixed;
+            left: 0;
+            top: 80px;
+            width: 250px;
+            height: calc(100vh - 80px);
+            background: white;
+            overflow-y: auto;
+            padding: 1rem 0;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        nav ul {
+            list-style: none;
+            padding: 0;
+        }
+        nav li {
+            padding: 0.5rem 1rem;
+        }
+        nav a {
+            text-decoration: none;
+            color: #333;
+            display: block;
+            transition: background 0.3s;
+        }
+        nav a:hover {
+            background: #f0f0f0;
+            border-right: 3px solid #667eea;
+        }
+        main {
+            margin-left: 250px;
+            padding: 2rem;
+            max-width: 1000px;
+        }
+        section {
+            margin-bottom: 3rem;
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            animation: fadeInUp 0.8s ease-out;
+        }
+        h1, h2, h3 {
+            color: #667eea;
+        }
+        .step-icon {
+            display: inline-block;
+            margin-right: 0.5rem;
+            color: #667eea;
+            animation: bounce 1s infinite alternate;
+        }
+        ol {
+            counter-reset: step-counter;
+        }
+        ol li {
+            counter-increment: step-counter;
+            position: relative;
+            padding-left: 2rem;
+        }
+        ol li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #667eea;
+            color: white;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+        pre {
+            background: #2d3748;
+            border-radius: 5px;
+            padding: 1rem;
+            overflow-x: auto;
+        }
+        code {
+            font-family: 'Courier New', monospace;
+        }
+        .icon-novel {
+            font-size: 2rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+            animation: pulse 2s infinite;
+        }
+        .example {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-5px); }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        @media (max-width: 768px) {
+            nav { width: 100%; position: relative; height: auto; }
+            main { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1><i class="fas fa-code"></i> Tutorial Angular 19: Parte 3 - TypeScript Avanzado, Listas y Condicionales</h1>
+    <p>Profundizando en TypeScript, renderizado de listas y condicionales en nuestro proyecto de gestión de tareas</p>
+</header>
+<nav>
+    <ul>
+        <li><a href="#undefined-union"><i class="fas fa-question-circle"></i> Valores Indefinidos y Tipos de Unión</a></li>
+        <li><a href="#object-inputs"><i class="fas fa-object-group"></i> Objetos como Entradas con Tipados</a></li>
+        <li><a href="#aliases-interfaces"><i class="fas fa-tags"></i> Alias de Tipos e Interfaces</a></li>
+        <li><a href="#list-content"><i class="fas fa-list"></i> Mostrar Contenido de Lista</a></li>
+        <li><a href="#conditional-content"><i class="fas fa-toggle-off"></i> Contenido Condicional</a></li>
+        <li><a href="#legacy-directives"><i class="fas fa-history"></i> ngFor y ngIf Heredados</a></li>
+        <li><a href="#more-components"><i class="fas fa-plus-circle"></i> Agregar Más Componentes</a></li>
+        <li><a href="#user-tasks"><i class="fas fa-tasks"></i> Tareas Específicas del Usuario</a></li>
+        <li><a href="#task-data"><i class="fas fa-clipboard-list"></i> Datos de Tareas en Componente</a></li>
+        <li><a href="#data-models"><i class="fas fa-file-alt"></i> Modelos en Archivos Separados</a></li>
+        <li><a href="#class-binding"><i class="fas fa-palette"></i> Estilizado CSS Dinámico</a></li>
+    </ul>
+</nav>
+<main>
+    <section id="undefined-union" class="animate__animated animate__fadeIn">
+        <h2 class="icon-novel"><i class="fas fa-question-circle"></i> 1. TypeScript: Valores Potencialmente Indefinidos y Tipos de Unión en Angular</h2>
+        <p><strong>Concepto:</strong> En TypeScript, los valores indefinidos (undefined o null) son comunes en datos asíncronos o opcionales. Los tipos de unión permiten variables que pueden ser de múltiples tipos, mejorando la seguridad de tipos en Angular 19.</p>
+        <p><strong>¿Qué es?</strong> Un tipo de unión es como string | number; para indefinidos, usa ? en propiedades o | undefined.</p>
+        <p><strong>Explicación detallada:</strong> Angular 19 integra mejor con TS 5.8, usando strictNullChecks para forzar chequeos. Usa non-null assertion (!) o chequeos if para evitar errores en runtime. En Signals, los inputs pueden ser undefined hasta binding.</p>
+        <div class="example">
+            <h3>Ejemplo 1: Tipo de unión básico</h3>
+            <pre><code class="language-typescript">let value: string | number = 'Hola';
+value = 42; // OK
+// value = true; // Error TS</code></pre>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Propiedad opcional con undefined</h3>
+            <pre><code class="language-typescript">interface Task {
+  title: string;
+  completed?: boolean; // Puede ser undefined
+}
+const task: Task = { title: 'Aprender TS' };
+// task.completed = undefined; // Implícito
+if (task.completed !== undefined) {
+  console.log(task.completed ? 'Hecha' : 'Pendiente');
+}</code></pre>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 3: En input de Signal</h3>
+            <pre><code class="language-typescript">optionalTitle = input&lt;string | undefined&gt;();
+const displayTitle = () => this.optionalTitle() ?? 'Tarea sin título';</code></pre>
+        </div>
+        <p><strong>Aplicación al proyecto:</strong> En el componente de tareas, usa tipos de unión para estados pending | completed.</p>
+    </section>
+
+    <section id="object-inputs">
+        <h2><i class="fas fa-object-group step-icon"></i> 2. Aceptar Objetos como Entradas y Agregar Tipados Apropiados en Angular</h2>
+        <p><strong>Concepto:</strong> Inputs de objetos permiten pasar estructuras complejas a componentes hijos, con tipado para autocompletado y validación.</p>
+        <p><strong>¿Qué es?</strong> Usar interfaces o types para definir la forma del objeto en input().</p>
+        <p><strong>Explicación detallada:</strong> En Angular 19, los Signals inputs son reactivos; el tipado previene errores. Usa computed para derivar valores de objetos.</p>
+        <div class="example">
+            <h3>Ejemplo 1: Input de objeto simple</h3>
+            <pre><code class="language-typescript">interface UserTask { userId: number; taskId: number; }
+taskInput = input&lt;UserTask&gt;({ userId: 1, taskId: 1 });</code></pre>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Binding en template padre</h3>
+            <pre><code class="language-html">&lt;app-task [taskData]="{ userId: user.id, taskId: 5 }"&gt;&lt;/app-task&gt;</code></pre>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 3: Validación en componente</h3>
+            <pre><code class="language-typescript">ngOnInit() {
+  if (!this.taskInput()?.userId) throw new Error('UserId requerido');
+}</code></pre>
+        </div>
+        <p><strong>Aplicación:</strong> Pasa objeto Task completo al componente TaskDisplay.</p>
+    </section>
+
+    <section id="aliases-interfaces">
+        <h2><i class="fas fa-tags step-icon"></i> 3. TypeScript: Alias de Tipos e Interfaces en Angular y Aplicaciones</h2>
+        <p><strong>Concepto:</strong> Alias (type) reutilizan tipos complejos; interfaces definen contratos para objetos, ideales para props y APIs.</p>
+        <p><strong>¿Qué es?</strong> type Alias = string | number; interface Task { title: string; }</p>
+        <p><strong>Explicación detallada:</strong> Interfaces permiten herencia (extends); aliases para uniones. En Angular 19, úsalos en models para Signals y servicios.</p>
+        <div class="example">
+            <h3>Ejemplo 1: Alias para unión</h3>
+            <pre><code class="language-typescript">type Status = 'pending' | 'completed' | 'cancelled';
+let taskStatus: Status = 'pending';</code></pre>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Interface con herencia</h3>
+            <pre><code class="language-typescript">interface BaseTask { id: number; title: string; }
+interface UserTask extends BaseTask { userId: number; }
+const ut: UserTask = { id: 1, title: 'Tarea', userId: 1 };</code></pre>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 3: En componente</h3>
+            <pre><code class="language-typescript">tasks = input&lt;UserTask[]&gt;();</code></pre>
+        </div>
+        <p><strong>Aplicación:</strong> Define interface Task en models/task.ts para consistencia.</p>
+    </section>
+
+    <section id="list-content">
+        <h2><i class="fas fa-list step-icon"></i> 4. Mostrar Contenido de una Lista en Angular</h2>
+        <p><strong>Concepto:</strong> Renderiza arrays dinámicamente con @for (nuevo en Angular 17+, preferido en 19).</p>
+        <p><strong>¿Qué es?</strong> Bloque @for que itera sobre colecciones, con track para performance.</p>
+        <p><strong>Explicación detallada:</strong> Mejora sobre *ngFor: más legible, integra Signals, evita trackBy manual en muchos casos.</p>
+        <div class="example">
+            <h3>Ejemplo 1: @for básico</h3>
+            <pre><code class="language-html">@for (task of tasks; track task.id) {
+  &lt;p&gt;{{task.title}}&lt;/p&gt;
+} @empty {
+  &lt;p&gt;No hay tareas.&lt;/p&gt;
+}</code></pre>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Con índice</h3>
+            <pre><code class="language-html">@for (task of tasks; track task.id; let i = $index) {
+  &lt;p&gt;{{i + 1}}. {{task.title}}&lt;/p&gt;
+}</code></pre>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 3: En Signal</h3>
+            <pre><code class="language-typescript">tasks = signal&lt;Task[]&gt;([]);</code></pre>
+        </div>
+        <p><strong>Aplicación:</strong> Lista de tareas del usuario en UserTasksComponent.</p>
+    </section>
+
+    <section id="conditional-content">
+        <h2><i class="fas fa-toggle-off step-icon"></i> 5. Mostrar Contenido Condicional en Angular</h2>
+        <p><strong>Concepto:</strong> Muestra/oculta elementos basado en condiciones con @if (nuevo control flow).</p>
+        <p><strong>¿Qué es?</strong> Bloque @if { ... } @else { ... } para lógica if-else en templates.</p>
+        <p><strong>Explicación detallada:</strong> En Angular 19, deprecated *ngIf; @if es más intuitivo, soporta else if chains.</p>
+        <div class="example">
+            <h3>Ejemplo 1: @if simple</h3>
+            <pre><code class="language-html">@if (user.loggedIn) {
+  &lt;p&gt;Bienvenido, {{user.name}}!&lt;/p&gt;
+} @else {
+  &lt;p&gt;Por favor, inicia sesión.&lt;/p&gt;
+}</code></pre>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Múltiples condiciones</h3>
+            <pre><code class="language-html">@if (tasks.length > 0) {
+  &lt;ul&gt;@for (t of tasks; track t.id) { &lt;li&gt;{{t.title}}&lt;/li&gt; }&lt;/ul&gt;
+} @else if (loading) {
+  &lt;p&gt;Cargando...&lt;/p&gt;
+} @else {
+  &lt;p&gt;Sin tareas.&lt;/p&gt;
+}</code></pre>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 3: Con Signal</h3>
+            <pre><code class="language-typescript">isVisible = signal(true);</code></pre>
+            <pre><code class="language-html">@if (isVisible()) { &lt;div&gt;Visible&lt;/div&gt; }</code></pre>
+        </div>
+        <p><strong>Aplicación:</strong> Muestra tareas solo si usuario autenticado.</p>
+    </section>
+
+    <section id="legacy-directives">
+        <h2><i class="fas fa-history step-icon"></i> 6. Angular Heredado: Usar ngFor y ngIf (muy simple como se hacia)</h2>
+        <p><strong>Concepto:</strong> Las directivas legacy *ngFor y *ngIf aún funcionan en Angular 19, pero con warnings de deprecación.</p>
+        <p><strong>¿Qué es?</strong> *ngFor="let item of items; trackBy: trackFn" y *ngIf="condition".</p>
+        <p><strong>Explicación detallada:</strong> Migrar a @for/@if para futuro; legacy usa structural directives que manipulan DOM.</p>
+        <div class="example">
+            <h3>Ejemplo 1: *ngFor simple</h3>
+            <pre><code class="language-html">&lt;ul&gt;
+  &lt;li *ngFor="let task of tasks; trackBy: trackById"&gt;{{task.title}}&lt;/li&gt;
+&lt;/ul&gt;</code></pre>
+            <pre><code class="language-typescript">trackById(index: number, item: Task): number { return item.id; }</code></pre>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: *ngIf con else</h3>
+            <pre><code class="language-html">&lt;ng-container *ngIf="tasks.length; else noTasks"&gt;
+  &lt;p&gt;Tareas cargadas&lt;/p&gt;
+&lt;/ng-container&gt;
+&lt;ng-template #noTasks&gt;&lt;p&gt;No tasks&lt;/p&gt;&lt;/ng-template&gt;</code></pre>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 3: Combinado</h3>
+            <pre><code class="language-html">&lt;div *ngIf="user; else login"&gt;
+  &lt;p *ngFor="let t of user.tasks"&gt;{{t}}&lt;/p&gt;
+&lt;/div&gt;</code></pre>
+        </div>
+        <p><strong>Aplicación:</strong> Para compatibilidad legacy en proyecto existente.</p>
+    </section>
+
+    <section id="more-components">
+        <h2><i class="fas fa-plus-circle step-icon"></i> 7. Agregar más Componentes a la Aplicación en Angular</h2>
+        <p><strong>Concepto:</strong> Modulariza con CLI para componentes como TaskList y TaskItem.</p>
+        <p><strong>¿Qué es?</strong> ng g c new-comp para generar.</p>
+        <p><strong>Explicación detallada:</strong> En Angular 19, soporta standalone components por default; declara en app.routes para lazy loading.</p>
+        <ol>
+            <li>ng g c task-list --standalone</li>
+            <li>Importa en app.component.ts</li>
+        </ol>
+        <div class="example">
+            <h3>Ejemplo 1: Generar standalone</h3>
+            <pre><code class="language-bash">ng g c task-item --standalone</code></pre>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Usar en padre</h3>
+            <pre><code class="language-html">&lt;app-task-list [tasks]="userTasks"&gt;&lt;/app-task-list&gt;</code></pre>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 3: Exports en standalone</h3>
+            <pre><code class="language-typescript">@Component({ ... imports: [CommonModule], exports: [TaskItemComponent] })</code></pre>
+        </div>
+        <p><strong>Aplicación:</strong> Crea TaskList para mostrar tareas.</p>
+    </section>
+
+    <section id="user-tasks">
+        <h2><i class="fas fa-tasks step-icon"></i> 8. Mostrar Tareas Específicas del Usuario en Angular</h2>
+        <p><strong>Concepto:</strong> Filtra y muestra tareas basadas en userId usando @for.</p>
+        <p><strong>¿Qué es?</strong> computed Signal para lista filtrada.</p>
+        <p><strong>Explicación detallada:</strong> Reactivo: cambios en tasks o userId actualizan vista automáticamente.</p>
+        <div class="example">
+            <h3>Ejemplo 1: Filtrado en computed</h3>
+            <pre><code class="language-typescript">userTasks = computed(() => this.allTasks().filter(t => t.userId === this.currentUserId()));</code></pre>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: En template</h3>
+            <pre><code class="language-html">@for (task of userTasks(); track task.id) {
+  &lt;app-task-item [task]="task"&gt;&lt;/app-task-item&gt;
+}</code></pre>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 3: Actualización</h3>
+            <pre><code class="language-typescript">addTask(newTask: Task) { this.allTasks.update(tasks => [...tasks, { ...newTask, userId: this.currentUserId() }]); }</code></pre>
+        </div>
+        <p><strong>Aplicación:</strong> En UserProfile, muestra solo tareas del usuario.</p>
+    </section>
+
+    <section id="task-data">
+        <h2><i class="fas fa-clipboard-list step-icon"></i> 9. Mostrar Datos de Tareas en el Componente de Tareas</h2>
+        <p><strong>Concepto:</strong> Componente hijo renderiza detalles de Task con interpolación y binding.</p>
+        <p><strong>¿Qué es?</strong> Input de Task, @if para estados.</p>
+        <p><strong>Explicación detallada:</strong> Usa getters para formato, eventos para interacciones.</p>
+        <div class="example">
+            <h3>Ejemplo 1: Input y display</h3>
+            <pre><code class="language-typescript">task = input.required&lt;Task&gt;();</code></pre>
+            <pre><code class="language-html">&lt;p&gt;{{task().title}} - {{task().dueDate | date}}&lt;/p&gt;</code></pre>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Condicional por estado</h3>
+            <pre><code class="language-html">@if (task().completed) { &lt;span class="done"&gt;✓&lt;/span&gt; }</code></pre>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 3: Getter para badge</h3>
+            <pre><code class="language-typescript">get priorityClass() { return `priority-${this.task().priority}`; }</code></pre>
+        </div>
+        <p><strong>Aplicación:</strong> TaskItemComponent muestra detalles.</p>
+    </section>
+
+    <section id="data-models">
+        <h2><i class="fas fa-file-alt step-icon"></i> 10. Almacenar Modelos de Datos en Archivos Separados en Angular</h2>
+        <p><strong>Concepto:</strong> Separa models en src/app/models/ para reutilización y mantenibilidad.</p>
+        <p><strong>¿Qué es?</strong> Archivos .ts con interfaces/types exportados.</p>
+        <p><strong>Explicación detallada:</strong> Facilita testing y escalabilidad; importa en componentes/servicios.</p>
+        <ol>
+            <li>Crea models/task.model.ts</li>
+            <li>Exporta interface Task</li>
+            <li>Importa donde necesites</li>
+        </ol>
+        <div class="example">
+            <h3>Ejemplo 1: task.model.ts</h3>
+            <pre><code class="language-typescript">export interface Task {
+  id: number;
+  title: string;
+  completed: boolean;
+  dueDate: Date;
+  userId: number;
+}</code></pre>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Import en componente</h3>
+            <pre><code class="language-typescript">import { Task } from '../models/task.model';
+tasks = signal&lt;Task[]&gt;([]);</code></pre>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 3: En servicio</h3>
+            <pre><code class="language-typescript">getTasksByUser(userId: number): Observable&lt;Task[]&gt; { ... }</code></pre>
+        </div>
+        <p><strong>Aplicación:</strong> Centraliza models para todo el proyecto de tareas.</p>
+    </section>
+
+    <section id="class-binding">
+        <h2><i class="fas fa-palette step-icon"></i> 11. Estilizado CSS Dinámico con Vinculación de Clases en Angular</h2>
+        <p><strong>Concepto:</strong> Aplica clases CSS condicionalmente con [class] o ngClass.</p>
+        <p><strong>¿Qué es?</strong> [class.completed]="task.completed" o [ngClass]="{done: task.completed}".</p>
+        <p><strong>Explicación detallada:</strong> En Angular 19, integra con Signals para reactividad; prefiere [class.name] para single, ngClass para multiple.</p>
+        <div class="example">
+            <h3>Ejemplo 1: [class] binding</h3>
+            <pre><code class="language-html">&lt;div [class.high-priority]="task.priority === 'high'"&gt;{{task.title}}&lt;/div&gt;</code></pre>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: ngClass objeto</h3>
+            <pre><code class="language-html">&lt;p [ngClass]="{ 'completed': task.completed, 'overdue': isOverdue(task) }"&gt;{{task.title}}&lt;/p&gt;</code></pre>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 3: Con array</h3>
+            <pre><code class="language-html">&lt;span [ngClass]="['badge', getPriorityClass(task)]"&gt;{{task.priority}}&lt;/span&gt;</code></pre>
+            <pre><code class="language-typescript">getPriorityClass(task: Task) { return `priority-${task.priority}`; }</code></pre>
+        </div>
+        <p><strong>Aplicación:</strong> Estiliza tareas completadas en verde, pendientes en rojo.</p>
+    </section>
+</main>
+<script>
+    // Smooth scroll for nav links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+    Prism.highlightAll();
+</script>
+</body>
+</html>
