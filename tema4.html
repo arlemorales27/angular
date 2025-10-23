@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial Angular 19: Parte 4 - Comunicación, Directivas, Servicios y Almacenamiento</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 0;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        nav {
+            position: fixed;
+            left: 0;
+            top: 80px;
+            width: 250px;
+            height: calc(100vh - 80px);
+            background: white;
+            overflow-y: auto;
+            padding: 1rem 0;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        nav ul {
+            list-style: none;
+            padding: 0;
+        }
+        nav li {
+            padding: 0.5rem 1rem;
+        }
+        nav a {
+            text-decoration: none;
+            color: #333;
+            display: block;
+            transition: background 0.3s;
+        }
+        nav a:hover {
+            background: #f0f0f0;
+            border-right: 3px solid #667eea;
+        }
+        main {
+            margin-left: 250px;
+            padding: 2rem;
+            max-width: 1000px;
+        }
+        section {
+            margin-bottom: 3rem;
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            animation: fadeInUp 0.8s ease-out;
+        }
+        h1, h2, h3 {
+            color: #667eea;
+        }
+        .step-icon {
+            display: inline-block;
+            margin-right: 0.5rem;
+            color: #667eea;
+            animation: bounce 1s infinite alternate;
+        }
+        ol {
+            counter-reset: step-counter;
+        }
+        ol li {
+            counter-increment: step-counter;
+            position: relative;
+            padding-left: 2rem;
+        }
+        ol li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #667eea;
+            color: white;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+        pre {
+            background: #2d3748;
+            border-radius: 5px;
+            padding: 1rem;
+            overflow-x: auto;
+        }
+        code {
+            font-family: 'Courier New', monospace;
+        }
+        .icon-novel {
+            font-size: 2rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+            animation: pulse 2s infinite;
+        }
+        .example {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-5px); }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        @media (max-width: 768px) {
+            nav { width: 100%; position: relative; height: auto; }
+            main { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1><i class="fas fa-code"></i> Tutorial Angular 19: Parte 4 - Comunicación, Directivas, Servicios y Almacenamiento</h1>
+    <p>Avanzando en el proyecto de gestión de tareas: Comunicación entre componentes, directivas, servicios y persistencia local</p>
+</header>
+<nav>
+    <ul>
+        <li><a href="#delete-tasks"><i class="fas fa-trash"></i> Eliminar Tareas: Comunicación entre Componentes</a></li>
+        <li><a href="#conditional-render"><i class="fas fa-eye"></i> Renderizar Componentes Condicionalmente</a></li>
+        <li><a href="#dialog-new-task"><i class="fas fa-plus-square"></i> Gestionar Cuadro de Diálogo 'Nueva Tarea'</a></li>
+        <li><a href="#directives-two-way"><i class="fas fa-exchange-alt"></i> Directivas y Vinculación Bidireccional</a></li>
+        <li><a href="#signals-two-way"><i class="fas fa-signal"></i> Signals y Vinculación Bidireccional</a></li>
+        <li><a href="#handle-sent-info"><i class="fas fa-inbox"></i> Manejar Información Enviada</a></li>
+        <li><a href="#use-sent-info"><i class="fas fa-lightbulb"></i> Usar Información Enviada</a></li>
+        <li><a href="#ng-content"><i class="fas fa-project-diagram"></i> Proyección de Contenido con ng-content</a></li>
+        <li><a href="#pipes"><i class="fas fa-filter"></i> Transformar Datos con Pipes</a></li>
+        <li><a href="#locale-config"><i class="fas fa-globe"></i> Modificar Configuración Regional</a></li>
+        <li><a href="#services"><i class="fas fa-cogs"></i> Servicios en Angular</a></li>
+        <li><a href="#di"><i class="fas fa-syringe"></i> Inyección de Dependencias</a></li>
+        <li><a href="#more-services"><i class="fas fa-tools"></i> Más Uso de Servicios y DI Alternativa</a></li>
+        <li><a href="#practice-services"><i class="fas fa-dumbbell"></i> Hora de Practicar: Servicios</a></li>
+        <li><a href="#localstorage"><i class="fas fa-database"></i> Usar localStorage</a></li>
+    </ul>
+</nav>
+<main>
+    <section id="delete-tasks" class="animate__animated animate__fadeIn">
+        <h2 class="icon-novel"><i class="fas fa-trash"></i> 1. Eliminar Tareas: Comunicación entre Componentes en Angular</h2>
+        <p><strong>Concepto:</strong> La comunicación entre componentes padre-hijo usa @Input y @Output para flujo unidireccional, permitiendo que un hijo notifique al padre sobre acciones como eliminar una tarea.</p>
+        <p><strong>¿Qué es?</strong> Un patrón donde el hijo emite eventos vía Output&lt;Event&gt;() y el padre los maneja, manteniendo el estado en el padre para escalabilidad.</p>
+        <p><strong>Explicación detallada:</strong> En Angular 19, los Outputs son Signals reactivos por defecto, optimizando detección de cambios. El padre actualiza el array de tareas con filter() o splice(), y el hijo recibe la lista actualizada vía Input. Evita mutaciones directas para inmutabilidad.</p>
+        <div class="example">
+            <h3>Ejemplo 1: Output en TaskItem para eliminar</h3>
+            <pre><code class="language-typescript">// task-item.component.ts
+import { Component, input, output, EventEmitter } from '@angular/core';
+import { Task } from '../models/task.model';
+
+@Component({
+  selector: 'app-task-item',
+  template: `
+    &lt;div&gt;{{task().title}}&lt;button (click)="delete.emit(task())"&gt;Eliminar&lt;/button&gt;&lt;/div&gt;
+  `
+})
+export class TaskItemComponent {
+  task = input.required&lt;Task&gt;();
+  delete = output&lt;Task&gt;(); // Emite la tarea a eliminar
+}</code></pre>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Manejo en padre TaskList</h3>
+            <pre><code class="language-typescript">// task-list.component.ts
+import { Component, computed } from '@angular/core';
+
+@Component({
+  selector: 'app-task-list',
+  template: `
+    @for (t of filteredTasks(); track t.id) {
+      &lt;app-task-item [task]="t" (delete)="onDelete($event)"&gt;&lt;/app-task-item&gt;
+    }
+  `
+})
+export class TaskListComponent {
+  tasks = input.required&lt;Task[]&gt;();
+  filteredTasks = computed(() => this.tasks());
+
+  onDelete(taskToDelete: Task) {
+    this.tasks.set(this.tasks().filter(t => t.id !== taskToDelete.id)); // Actualiza inmutable
+  }
+}</code></pre>
+        </div>
+        <p><strong>Aplicación al proyecto:</strong> En TaskList, elimina tareas específicas del usuario, actualizando la UI reactivamente.</p>
+    </section>
+
+    <section id="conditional-render">
+        <h2><i class="fas fa-eye step-icon"></i> 2. Renderizar Componentes Condicionalmente en Angular</h2>
+        <p><strong>Concepto:</strong> Usa @if para renderizar componentes dinámicamente basado en estado, como mostrar un formulario solo si hay tareas pendientes.</p>
+        <p><strong>¿Qué es?</strong> Control flow @if que condicionalmente incluye elementos DOM, más eficiente que *ngIf en Angular 19 por su integración con Signals.</p>
+        <p><strong>Explicación detallada:</strong> @if evalúa expresiones en compile-time donde posible, reduciendo overhead. Para componentes, envuélvelos en @if; usa @else para alternativas. En Signals, lee valores con () para reactividad fina.</p>
+        <div class="example">
+            <h3>Ejemplo 1: @if para componente de edición</h3>
+            <pre><code class="language-html">@if (editingTaskId() &gt; 0) {
+  &lt;app-task-edit [taskId]="editingTaskId()"&gt;&lt;/app-task-edit&gt;
+} @else {
+  &lt;app-task-list [tasks]="tasks()"&gt;&lt;/app-task-list&gt;
+}</code></pre>
+            <pre><code class="language-typescript">editingTaskId = signal(0);</code></pre>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Condicional con loading</h3>
+            <pre><code class="language-html">@if (loading()) {
+  &lt;app-loader&gt;&lt;/app-loader&gt;
+} @else if (tasks().length === 0) {
+  &lt;app-empty-state&gt;&lt;/app-empty-state&gt;
+} @else {
+  &lt;app-task-list [tasks]="tasks()"&gt;&lt;/app-task-list&gt;
+}</code></pre>
+            <pre><code class="language-typescript">loading = signal(true);
+tasks = signal&lt;Task[]&gt;([]);</code></pre>
+        </div>
+        <p><strong>Aplicación:</strong> Renderiza TaskEdit solo al seleccionar una tarea para editar.</p>
+    </section>
+
+    <section id="dialog-new-task">
+        <h2><i class="fas fa-plus-square step-icon"></i> 3. Gestionar el Cuadro de Diálogo de 'Nueva Tarea' en Angular</h2>
+        <p><strong>Concepto:</strong> Implementa modales con @if y overlays, gestionando visibilidad vía Signals para agregar tareas.</p>
+        <p><strong>¿Qué es?</strong> Un componente Dialog que se muestra condicionalmente, con backdrop y cierre vía eventos.</p>
+        <p><strong>Explicación detallada:</strong> En Angular 19, usa CDK Overlay para modales nativos, pero para simpleza, @if con CSS fixed. El padre maneja el estado visible, el hijo emite submit/close.</p>
+        <div class="example">
+            <h3>Ejemplo 1: Componente Dialog básico</h3>
+            <pre><code class="language-typescript">// new-task-dialog.component.ts
+import { Component, output } from '@angular/core';
+
+@Component({
+  selector: 'app-new-task-dialog',
+  template: `
+    &lt;div class="dialog-overlay" (click)="close.emit()"&gt;
+      &lt;div class="dialog" (click)="$event.stopPropagation()"&gt;
+        &lt;input [(ngModel)]="title" placeholder="Título"&gt;
+        &lt;button (click)="submit.emit({title})"&gt;Agregar&lt;/button&gt;
+        &lt;button (click)="close.emit()"&gt;Cerrar&lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  `,
+  styles: [`.dialog-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); } .dialog { background: white; margin: 20% auto; padding: 2rem; width: 300px; }`]
+})
+export class NewTaskDialogComponent {
+  title = '';
+  submit = output&lt;Partial&lt;Task&gt;&gt;();
+  close = output();
+}</code></pre>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Uso en padre con @if</h3>
+            <pre><code class="language-html">@if (showDialog()) {
+  &lt;app-new-task-dialog (submit)="addTask($event); showDialog.set(false)" (close)="showDialog.set(false)"&gt;&lt;/app-new-task-dialog&gt;
+}</code></pre>
+            <pre><code class="language-typescript">showDialog = signal(false);
+addTask(partial: Partial&lt;Task&gt;) {
+  const newTask: Task = { id: Date.now(), ...partial, completed: false, userId: 1 };
+  this.tasks.update(t => [...t, newTask]);
+}</code></pre>
+        </div>
+        <p><strong>Aplicación:</strong> Botón 'Nueva Tarea' toggles el dialog en TaskList.</p>
+    </section>
+
+    <section id="directives-two-way">
+        <h2><i class="fas fa-exchange-alt step-icon"></i> 4. Directivas y Vinculación Bidireccional en Angular</h2>
+        <p><strong>Concepto:</strong> Vinculación bidireccional ([(ngModel)]) sincroniza modelo y vista, con directivas como ngModel para forms.</p>
+        <p><strong>¿Qué es?</strong> Syntax de banana en corchetes [( )] que combina property y event binding para dos vías.</p>
+        <p><strong>Explicación detallada:</strong> Requiere FormsModule; en Angular 19, deprecated en favor de model(), pero legacy soporta. Para custom, implementa ControlValueAccessor.</p>
+        <div class="example">
+            <h3>Ejemplo 1: ngModel básico en input</h3>
+            <pre><code class="language-html">&lt;input [(ngModel)]="taskTitle" placeholder="Título de tarea" name="title"&gt;
+&lt;p&gt;Valor: {{taskTitle}}&lt;/p&gt;</code></pre>
+            <pre><code class="language-typescript">import { Component } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+
+@Component({
+  standalone: true,
+  imports: [FormsModule],
+  // ...
+})
+export class TaskFormComponent {
+  taskTitle = '';
+}</code></pre>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: En select con ngModel</h3>
+            <pre><code class="language-html">&lt;select [(ngModel)]="priority" name="priority"&gt;
+  &lt;option value="low"&gt;Baja&lt;/option&gt;
+  &lt;option value="high"&gt;Alta&lt;/option&gt;
+&lt;/select&gt;
+&lt;p&gt;Prioridad: {{priority}}&lt;/p&gt;</code></pre>
+            <pre><code class="language-typescript">priority = 'low';</code></pre>
+        </div>
+        <p><strong>Aplicación:</strong> En NewTaskDialog, usa ngModel para binding de inputs.</p>
+    </section>
+
+    <section id="signals-two-way">
+        <h2><i class="fas fa-signal step-icon"></i> 5. Signals y Vinculación Bidireccional en Angular</h2>
+        <p><strong>Concepto:</strong> Usa model() para two-way binding con Signals, reemplazando ngModel en Angular 19.</p>
+        <strong>¿Qué es?</strong> Directiva @angular/core/model que sincroniza Signals writable con inputs.</p>
+        <p><strong>Explicación detallada:</strong> model() crea un getter/setter reactivo; ideal para forms reactivos sin FormsModule legacy. Soporta arrays y objetos con writeValue.</p>
+        <div class="example">
+            <h3>Ejemplo 1: Input simple con model</h3>
+            <pre><code class="language-html">&lt;input [model]="title" (modelChange)="title.set($event)"&gt;</code></pre>
+            <pre><code class="language-typescript">title = signal('');</code></pre>
+            <p>Nota: Para full two-way, usa la directiva model en Angular 19.</p>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Checkbox con model</h3>
+            <pre><code class="language-html">&lt;input type="checkbox" [model]="completed" (modelChange)="completed.set($event)"&gt; Completada</code></pre>
+            <pre><code class="language-typescript">completed = signal(false);</code></pre>
+        </div>
+        <p><strong>Aplicación:</strong> En TaskEdit, usa model para editar título reactivamente.</p>
+    </section>
+
+    <section id="handle-sent-info">
+        <h2><i class="fas fa-inbox step-icon"></i> 6. Manejar la Información Enviada en Angular</h2>
+        <p><strong>Concepto:</strong> Recibe datos de forms o eventos en métodos del componente, validando antes de procesar.</p>
+        <p><strong>¿Qué es?</strong> Handlers como onSubmit($event) que capturan FormData o payloads de Outputs.</p>
+        <p><strong>Explicación detallada:</strong> En Angular 19, usa Typed Forms para tipado; valida con if o validators, luego actualiza Signals.</p>
+        <div class="example">
+            <h3>Ejemplo 1: Manejar form submit</h3>
+            <pre><code class="language-typescript">onSubmit(form: NgForm) {
+  if (form.valid) {
+    const newTask: Task = { ...form.value, id: Date.now(), completed: false };
+    this.tasks.update(t => [...t, newTask]);
+    form.reset();
+  } else {
+    console.error('Form inválido');
+  }
+}</code></pre>
+            <pre><code class="language-html">&lt;form #taskForm="ngForm" (ngSubmit)="onSubmit(taskForm)"&gt;
+  &lt;input ngModel name="title" required&gt;
+  &lt;button type="submit"&gt;Enviar&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: De Output event</h3>
+            <pre><code class="language-typescript">onTaskAdded(event: Partial&lt;Task&gt;) {
+  if (event.title?.trim()) {
+    this.addTask(event);
+  }
+}</code></pre>
+        </div>
+        <p><strong>Aplicación:</strong> En AppComponent, maneja submits del Dialog.</p>
+    </section>
+
+    <section id="use-sent-info">
+        <h2><i class="fas fa-lightbulb step-icon"></i> 7. Usar la Información Enviada en Angular</h2>
+        <p><strong>Concepto:</strong> Integra datos recibidos en lógica de negocio, como agregar a un array o llamar servicios.</p>
+        <p><strong>¿Qué es?</strong> Procesamiento post-manejo, e.g., this.service.save(data) o state.update().</p>
+        <p><strong>Explicación detallada:</strong> Asegura inmutabilidad con spread o update(); en Angular 19, Signals propagan cambios automáticamente.</p>
+        <div class="example">
+            <h3>Ejemplo 1: Agregar a Signal array</h3>
+            <pre><code class="language-typescript">useSentInfo(data: Partial&lt;Task&gt;) {
+  const task: Task = { id: this.nextId++, ...data, completed: false, userId: this.userId() };
+  this.tasks.update(current => [...current, task]);
+  this.notifyUser('Tarea agregada');
+}</code></pre>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Llamar servicio</h3>
+            <pre><code class="language-typescript">useSentInfo(data: Task) {
+  this.taskService.create(data).subscribe({
+    next: (savedTask) => this.tasks.update(t => [...t, savedTask]),
+    error: (err) => console.error('Error al guardar', err)
+  });
+}</code></pre>
+        </div>
+        <p><strong>Aplicación:</strong> Usa info del dialog para persistir tareas.</p>
+    </section>
+
+    <section id="ng-content">
+        <h2><i class="fas fa-project-diagram step-icon"></i> 8. Proyección de Contenido con ng-content en Angular</h2>
+        <p><strong>Concepto:</strong> ng-content permite inyectar contenido del padre en slots del hijo, para templates flexibles.</p>
+        <p><strong>¿Qué es?</strong> Selector <ng-content select="[attr]"></ng-content> para múltiples slots.</p>
+        <p><strong>Explicación detallada:</strong> En Angular 19, soporta @ContentChild para query; úsalo para headers/footers en componentes reutilizables como Card.</p>
+        <div class="example">
+            <h3>Ejemplo 1: Slot simple</h3>
+            <pre><code class="language-typescript">// task-card.component.ts
+@Component({
+  template: `
+    &lt;div class="card"&gt;
+      &lt;ng-content&gt;&lt;/ng-content&gt; &lt;!-- Contenido por defecto --&gt;
+    &lt;/div&gt;
+  `
+})
+export class TaskCardComponent {}</code></pre>
+            <pre><code class="language-html">&lt;app-task-card&gt;
+  &lt;h3&gt;Tarea Importante&lt;/h3&gt;
+  &lt;p&gt;Descripción...&lt;/p&gt;
+&lt;/app-task-card&gt;</code></pre>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Múltiples slots</h3>
+            <pre><code class="language-html">&lt;div class="card"&gt;
+  &lt;ng-content select="[header]"&gt;&lt;/ng-content&gt;
+  &lt;ng-content&gt;&lt;/ng-content&gt;
+  &lt;ng-content select="[footer]"&gt;&lt;/ng-content&gt;
+&lt;/div&gt;</code></pre>
+            <pre><code class="language-html">&lt;app-task-card&gt;
+  &lt;div header&gt;Header&lt;/div&gt;
+  &lt;p&gt;Body&lt;/p&gt;
+  &lt;div footer&gt;Footer&lt;/div&gt;
+&lt;/app-task-card&gt;</code></pre>
+        </div>
+        <p><strong>Aplicación:</strong> En TaskItem, proyecta botones custom.</p>
+    </section>
+
+    <section id="pipes">
+        <h2><i class="fas fa-filter step-icon"></i> 9. Transformar Datos de Plantilla con Pipes en Angular</h2>
+        <p><strong>Concepto:</strong> Pipes transforman datos en templates, como fecha o filtros, de forma declarativa.</p>
+        <p><strong>¿Qué es?</strong> | pipeName:arg, e.g., {{date | date:'short'}}.</p>
+        <p><strong>Explicación detallada:</strong> Built-in como DatePipe; custom via @Pipe({pure: true}). En Angular 19, async pipes para observables/Signals.</p>
+        <div class="example">
+            <h3>Ejemplo 1: DatePipe y UpperCasePipe</h3>
+            <pre><code class="language-html">&lt;p&gt;Tarea: {{task.title | uppercase}} - Due: {{task.dueDate | date:'dd/MM/yyyy'}}&lt;/p&gt;</code></pre>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Custom filter pipe</h3>
+            <pre><code class="language-typescript">@Pipe({name: 'filterByStatus', pure: false})
+export class FilterByStatusPipe implements PipeTransform {
+  transform(tasks: Task[], status: string): Task[] {
+    return tasks.filter(t => t.completed === (status === 'completed'));
+  }
+}</code></pre>
+            <pre><code class="language-html">&lt;li *ngFor="let t of tasks | filterByStatus:'completed'"&gt;{{t.title}}&lt;/li&gt;</code></pre>
+        </div>
+        <p><strong>Aplicación:</strong> Pipe para filtrar tareas completadas en lista.</p>
+    </section>
+
+    <section id="locale-config">
+        <h2><i class="fas fa-globe step-icon"></i> 10. Modificar la Configuración Regional en Angular</h2>
+        <p><strong>Concepto:</strong> Configura locale para pipes como date/currency, usando LOCALE_ID.</p>
+        <p><strong>¿Qué es?</strong> Provider en bootstrap o module: {provide: LOCALE_ID, useValue: 'es-ES'}.</p>
+        <p><strong>Explicación detallada:</strong> En Angular 19, soporta i18n dinámico; importa registerLocaleData para extras.</p>
+        <div class="example">
+            <h3>Ejemplo 1: En main.ts standalone</h3>
+            <pre><code class="language-typescript">import { bootstrapApplication } from '@angular/platform-browser';
+import { LOCALE_ID } from '@angular/core';
+import { registerLocaleData } from '@angular/common';
+import localeEs from '@angular/common/locales/es';
+
+registerLocaleData(localeEs);
+
+bootstrapApplication(AppComponent, {
+  providers: [
+    { provide: LOCALE_ID, useValue: 'es-ES' },
+    // ...
+  ]
+});</code></pre>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Uso en template con locale</h3>
+            <pre><code class="language-html">&lt;p&gt;Fecha: {{today | date:'short':'':'es-ES'}}&lt;/p&gt;
+&lt;p&gt;Moneda: {{price | currency:'EUR':'symbol':'1.2-2':'es-ES'}}&lt;/p&gt;</code></pre>
+            <pre><code class="language-typescript">today = new Date();
+price = 123.45;</code></pre>
+        </div>
+        <p><strong>Aplicación:</strong> Formatea fechas de tareas en español.</p>
+    </section>
+
+    <section id="services">
+        <h2><i class="fas fa-cogs step-icon"></i> 11. Servicios (Services) en Angular</h2>
+        <p><strong>Concepto:</strong> Servicios encapsulan lógica reusable, como CRUD de tareas, inyectados en componentes.</p>
+        <p><strong>¿Qué es?</strong> Clases @Injectable() con métodos singleton por default.</p>
+        <p><strong>Explicación detallada:</strong> Genera con ng g s task; usa HttpClient para APIs. En Angular 19, tree-shakable.</p>
+        <div class="example">
+            <h3>Ejemplo 1: Servicio básico</h3>
+            <pre><code class="language-typescript">// task.service.ts
+import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
+
+@Injectable({ providedIn: 'root' })
+export class TaskService {
+  private tasksSubject = new BehaviorSubject&lt;Task[]&gt;([]);
+  tasks$ = this.tasksSubject.asObservable();
+
+  addTask(task: Task) {
+    const current = this.tasksSubject.value;
+    this.tasksSubject.next([...current, task]);
+  }
+
+  deleteTask(id: number) {
+    const current = this.tasksSubject.value;
+    this.tasksSubject.next(current.filter(t => t.id !== id));
+  }
+}</code></pre>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Con HttpClient</h3>
+            <pre><code class="language-typescript">import { HttpClient } from '@angular/common/http';
+
+constructor(private http: HttpClient) {}
+
+getTasks(): Observable&lt;Task[]&gt; {
+  return this.http.get&lt;Task[]&gt;('/api/tasks');
+}
+
+createTask(task: Task): Observable&lt;Task&gt; {
+  return this.http.post&lt;Task&gt;('/api/tasks', task);
+}</code></pre>
+        </div>
+        <p><strong>Aplicación:</strong> TaskService maneja todas las tareas del proyecto.</p>
+    </section>
+
+    <section id="di">
+        <h2><i class="fas fa-syringe step-icon"></i> 12. Inyección de Dependencias en Angular</h2>
+        <p><strong>Concepto:</strong> DI resuelve dependencias automáticamente, promoviendo loose coupling.</p>
+        <p><strong>¿Qué es?</strong> Constructor injection: constructor(private service: TaskService) {}.</p>
+        <p><strong>Explicación detallada:</strong> Angular injector hierarchy; providedIn: 'root' para app-wide. En Angular 19, environment injectors.</p>
+        <div class="example">
+            <h3>Ejemplo 1: Inyección en componente</h3>
+            <pre><code class="language-typescript">@Component({...})
+export class TaskListComponent {
+  constructor(private taskService: TaskService) {
+    this.tasks = this.taskService.tasks$;
+  }
+
+  ngOnInit() {
+    this.taskService.loadTasks();
+  }
+}</code></pre>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Provider en bootstrap</h3>
+            <pre><code class="language-typescript">bootstrapApplication(AppComponent, {
+  providers: [
+    TaskService, // O {provide: TaskService, useClass: MockTaskService}
+    { provide: 'API_URL', useValue: 'http://localhost:3000' }
+  ]
+});</code></pre>
+        </div>
+        <p><strong>Aplicación:</strong> Inyecta TaskService en todos los componentes de tareas.</p>
+    </section>
+
+    <section id="more-services">
+        <h2><i class="fas fa-tools step-icon"></i> 13. Más Uso de Servicios y Mecanismo Alternativo de Inyección de Dependencias en Angular</h2>
+        <p><strong>Concepto:</strong> Servicios para estado compartido; alternativa: inject() function para functional injection.</p>
+        <p><strong>¿Qué es?</strong> inject(TaskService) en lugar de constructor, para field injection.</p>
+        <p><strong>Explicación detallada:</strong> inject() en Angular 14+, útil en functions o non-class; soporta context en Angular 19.</p>
+        <div class="example">
+            <h3>Ejemplo 1: Uso avanzado en servicio</h3>
+            <pre><code class="language-typescript">// notification.service.ts
+@Injectable({ providedIn: 'root' })
+export class NotificationService {
+  show(message: string) {
+    // Lógica para toast
+    console.log('Notificación:', message);
+  }
+}
+
+// En TaskService
+constructor(private notif: NotificationService) {}
+
+addTask(task: Task) {
+  this.tasksSubject.next([...this.tasksSubject.value, task]);
+  this.notif.show('Tarea agregada');
+}</code></pre>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: inject() alternativa</h3>
+            <pre><code class="language-typescript">import { inject } from '@angular/core';
+
+@Component({...})
+export class TaskListComponent {
+  private taskService = inject(TaskService);
+  private router = inject(Router);
+
+  loadTasks() {
+    this.taskService.getTasks().subscribe(tasks => this.tasks.set(tasks));
+  }
+
+  navigateToEdit(id: number) {
+    this.router.navigate(['/edit', id]);
+  }
+}</code></pre>
+        </div>
+        <p><strong>Aplicación:</strong> Usa inject() en standalone components para simplicidad.</p>
+    </section>
+
+    <section id="practice-services">
+        <h2><i class="fas fa-dumbbell step-icon"></i> 14. Hora de Practicar: Servicios en Angular</h2>
+        <p><strong>Concepto:</strong> Ejercicio práctico: Crea un servicio para validar y persistir tareas.</p>
+        <p><strong>¿Qué es?</strong> Hands-on: Genera servicio, inyéctalo, implementa métodos.</p>
+        <p><strong>Explicación detallada:</strong> ng g s validation; integra con TaskService para checks antes de add.</p>
+        <ol>
+            <li>ng g s task-validation --standalone</li>
+            <li>Implementa isValid(task: Task): boolean</li>
+            <li>Inyecta en TaskService.addTask: if (this.validation.isValid(task)) { ... }</li>
+        </ol>
+        <div class="example">
+            <h3>Ejemplo 1: Servicio de validación</h3>
+            <pre><code class="language-typescript">@Injectable({ providedIn: 'root' })
+export class TaskValidationService {
+  isValid(task: Partial&lt;Task&gt;): boolean {
+    return !!task.title?.trim() && task.dueDate instanceof Date;
+  }
+
+  getErrors(task: Partial&lt;Task&gt;): string[] {
+    const errors: string[] = [];
+    if (!task.title?.trim()) errors.push('Título requerido');
+    if (!task.dueDate) errors.push('Fecha requerida');
+    return errors;
+  }
+}</code></pre>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Integración en TaskService</h3>
+            <pre><code class="language-typescript">constructor(private validation: TaskValidationService) {}
+
+addTask(task: Partial&lt;Task&gt;): boolean {
+  if (!this.validation.isValid(task)) {
+    const errors = this.validation.getErrors(task);
+    this.notif.show('Errores: ' + errors.join(', '));
+    return false;
+  }
+  // Agregar tarea...
+  return true;
+}</code></pre>
+        </div>
+        <p><strong>Aplicación:</strong> Prueba agregando tareas inválidas en el dialog.</p>
+    </section>
+
+    <section id="localstorage">
+        <h2><i class="fas fa-database step-icon"></i> 15. Usar localStorage para Almacenamiento de Datos</h2>
+        <p><strong>Concepto:</strong> Persiste datos en browser con localStorage, sincronizando con Signals.</p>
+        <p><strong>¿Qué es?</strong> API window.localStorage.setItem/getItem para strings; JSON para objetos.</p>
+        <p><strong>Explicación detallada:</strong> En servicio, usa effect() para sync; maneja errores de quota. En Angular 19, integra con zoneless para eficiencia.</p>
+        <div class="example">
+            <h3>Ejemplo 1: Guardar en localStorage</h3>
+            <pre><code class="language-typescript">// En TaskService
+import { effect } from '@angular/core';
+
+constructor() {
+  effect(() => {
+    localStorage.setItem('tasks', JSON.stringify(this.tasksSubject.value));
+  });
+}
+
+loadFromStorage() {
+  const stored = localStorage.getItem('tasks');
+  if (stored) {
+    this.tasksSubject.next(JSON.parse(stored));
+  }
+}</code></pre>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Cargar y manejar errores</h3>
+            <pre><code class="language-typescript">ngOnInit() {
+  try {
+    this.loadFromStorage();
+  } catch (e) {
+    console.error('Error cargando storage:', e);
+    this.tasksSubject.next([]);
+  }
+}
+
+clearStorage() {
+  localStorage.removeItem('tasks');
+  this.tasksSubject.next([]);
+}</code></pre>
+        </div>
+        <p><strong>Aplicación:</strong> Persiste tareas del usuario en localStorage para sesiones.</p>
+    </section>
+</main>
+<script>
+    // Smooth scroll for nav links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+    Prism.highlightAll();
+</script>
+</body>
+</html>
