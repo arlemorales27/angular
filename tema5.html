@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial Angular 19: Parte 5 - Módulos en Angular 19</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 0;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        nav {
+            position: fixed;
+            left: 0;
+            top: 80px;
+            width: 250px;
+            height: calc(100vh - 80px);
+            background: white;
+            overflow-y: auto;
+            padding: 1rem 0;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        nav ul {
+            list-style: none;
+            padding: 0;
+        }
+        nav li {
+            padding: 0.5rem 1rem;
+        }
+        nav a {
+            text-decoration: none;
+            color: #333;
+            display: block;
+            transition: background 0.3s;
+        }
+        nav a:hover {
+            background: #f0f0f0;
+            border-right: 3px solid #667eea;
+        }
+        main {
+            margin-left: 250px;
+            padding: 2rem;
+            max-width: 1000px;
+        }
+        section {
+            margin-bottom: 3rem;
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            animation: fadeInUp 0.8s ease-out;
+        }
+        h1, h2, h3 {
+            color: #667eea;
+        }
+        .step-icon {
+            display: inline-block;
+            margin-right: 0.5rem;
+            color: #667eea;
+            animation: bounce 1s infinite alternate;
+        }
+        ol {
+            counter-reset: step-counter;
+        }
+        ol li {
+            counter-increment: step-counter;
+            position: relative;
+            padding-left: 2rem;
+        }
+        ol li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #667eea;
+            color: white;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+        pre {
+            background: #2d3748;
+            border-radius: 5px;
+            padding: 1rem;
+            overflow-x: auto;
+        }
+        code {
+            font-family: 'Courier New', monospace;
+        }
+        .icon-novel {
+            font-size: 2rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+            animation: pulse 2s infinite;
+        }
+        .example {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-5px); }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        @media (max-width: 768px) {
+            nav { width: 100%; position: relative; height: auto; }
+            main { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1><i class="fas fa-code"></i> Tutorial Angular 19: Parte 5 - Módulos en Angular 19</h1>
+    <p>Explorando NgModules para organización y escalabilidad en nuestro proyecto de gestión de tareas</p>
+</header>
+<nav>
+    <ul>
+        <li><a href="#intro-modules"><i class="fas fa-layer-group"></i> Introducción a Módulos (NgModule)</a></li>
+        <li><a href="#create-empty-module"><i class="fas fa-file-plus"></i> Crear Módulo Vacío</a></li>
+        <li><a href="#app-init-modules"><i class="fas fa-rocket"></i> Inicialización con Módulos</a></li>
+        <li><a href="#declare-components"><i class="fas fa-puzzle-piece"></i> Declarar Componentes</a></li>
+        <li><a href="#summary-modules"><i class="fas fa-clipboard-list"></i> Primer Resumen</a></li>
+        <li><a href="#migrate-to-modules"><i class="fas fa-exchange-alt"></i> Migrar a Módulos</a></li>
+        <li><a href="#shared-modules"><i class="fas fa-share-alt"></i> Módulos Compartidos</a></li>
+        <li><a href="#complex-structures"><i class="fas fa-sitemap"></i> Estructuras Complejas</a></li>
+        <li><a href="#i18n-modules"><i class="fas fa-globe"></i> Región Local en Módulos</a></li>
+    </ul>
+</nav>
+<main>
+    <section id="intro-modules" class="animate__animated animate__fadeIn">
+        <h2 class="icon-novel"><i class="fas fa-layer-group"></i> 1. Introducción a Módulos de Angular (NgModule)</h2>
+        <p><strong>Concepto:</strong> Los NgModules son la unidad fundamental de organización en Angular, agrupando componentes, directivas, pipes y servicios relacionados en bloques cohesivos para facilitar la modularidad, lazy loading y configuración de DI.</p>
+        <p><strong>¿Qué es?</strong> Una clase decorada con @NgModule() que define metadatos como declarations (lo que compila), imports (dependencias), providers (servicios) y exports (lo que comparte).</p>
+        <p><strong>Explicación detallada:</strong> En Angular 19, aunque los componentes standalone reducen la dependencia de módulos<grok-card data-id="a9bfa9" data-type="citation_card"></grok-card>, los NgModules siguen siendo esenciales para apps grandes, permitiendo feature modules, shared modules y root module para bootstrap. Configuran el compilador (e.g., schemas) y el injector jerárquico para scopes de servicios. Beneficios: encapsulación, reutilización y testing aislado. En nuestro proyecto de tareas, usaremos módulos para separar features como 'tasks' y 'users'.</p>
+        <ol>
+            <li>Importa @NgModule de '@angular/core'.</li>
+            <li>Define la clase con decorator {declarations: [], imports: [], providers: [], exports: []}.</li>
+            <li>Registra en root o importa en otros módulos.</li>
+        </ol>
+        <div class="example">
+            <h3>Ejemplo 1: NgModule básico para Tasks</h3>
+            <pre><code class="language-typescript">import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { TaskListComponent } from './task-list.component';
+
+@NgModule({
+  declarations: [TaskListComponent], // Componentes locales
+  imports: [CommonModule], // Módulos necesarios (directivas comunes)
+  exports: [TaskListComponent] // Para uso externo
+})
+export class TasksModule {}</code></pre>
+            <p><strong>Explicación del código:</strong> declarations compila TaskListComponent; imports trae ngIf/ngFor; exports permite usarlo en app.module.</p>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: NgModule con providers para servicio</h3>
+            <pre><code class="language-typescript">import { NgModule } from '@angular/core';
+import { TaskService } from './task.service';
+
+@NgModule({
+  providers: [TaskService], // Servicio inyectable solo en este módulo
+  // ...
+})
+export class FeatureModule {}</code></pre>
+            <p><strong>Explicación del código:</strong> providers crea un injector local; el servicio no es global, evitando singletons no deseados.</p>
+        </div>
+        <p><strong>Aplicación al proyecto:</strong> Crea TasksModule para encapsular lógica de tareas.</p>
+    </section>
+
+    <section id="create-empty-module">
+        <h2><i class="fas fa-file-plus step-icon"></i> 2. Crear un Módulo Vacío en Angular</h2>
+        <p><strong>Concepto:</strong> Genera un NgModule skeleton con CLI para bootstrapping rápido de features.</p>
+        <p><strong>¿Qué es?</strong> ng g m module-name, crea module.ts vacío listo para declarations/imports.</p>
+        <p><strong>Explicación detallada:</strong> En Angular 19 CLI, el schematic genera un archivo con @NgModule({}) básico, incluyendo CommonModule import por default. Útil para placeholders antes de agregar componentes. Opciones: --routing para routes, --dry-run para preview.</p>
+        <ol>
+            <li>Ejecuta ng generate module tasks.</li>
+            <li>Revisa tasks.module.ts generado.</li>
+            <li>Agrega declarations manualmente.</li>
+        </ol>
+        <div class="example">
+            <h3>Ejemplo 1: CLI comando básico</h3>
+            <pre><code class="language-bash">ng generate module shared --dry-run</code></pre>
+            <p><strong>Explicación del código:</strong> --dry-run simula sin crear archivos; ve el output: crea src/app/shared/shared.module.ts con imports: [CommonModule].</p>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Con routing</h3>
+            <pre><code class="language-bash">ng g m users --routing</code></pre>
+            <pre><code class="language-typescript">// users-routing.module.ts generado
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
+
+const routes: Routes = [];
+
+@NgModule({
+  imports: [RouterModule.forChild(routes)],
+  exports: [RouterModule]
+})
+export class UsersRoutingModule {}</code></pre>
+            <p><strong>Explicación del código:</strong> Crea módulo de rutas hijo; forChild() para feature routing, integra con app-routing.</p>
+        </div>
+        <p><strong>Aplicación:</strong> Crea TasksModule vacío para expandir.</p>
+    </section>
+
+    <section id="app-init-modules">
+        <h2><i class="fas fa-rocket step-icon"></i> 3. Inicialización de Aplicaciones con Módulos de Angular</h2>
+        <p><strong>Concepto:</strong> Bootstrap la app vía root module en main.ts para configurar el injector y compiler globales.</p>
+        <p><strong>¿Qué es?</strong> platformBrowserDynamic().bootstrapModule(AppModule) en main.ts.</p>
+        <p><strong>Explicación detallada:</strong> AppModule es el root, importando BrowserModule (no CommonModule). En Angular 19, soporta híbrido con standalone: importa bootstrapApplication si mezclas. Configura providers globales como HttpClientModule.</p>
+        <ol>
+            <li>Crea app.module.ts con @NgModule.</li>
+            <li>Importa AppComponent en declarations y Bootstrap.</li>
+            <li>Llama bootstrapModule en main.ts.</li>
+        </ol>
+        <div class="example">
+            <h3>Ejemplo 1: AppModule root básico</h3>
+            <pre><code class="language-typescript">import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { AppComponent } from './app.component';
+
+@NgModule({
+  declarations: [AppComponent],
+  imports: [BrowserModule],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule {}</code></pre>
+            <pre><code class="language-typescript">// main.ts
+import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+import { AppModule } from './app/app.module';
+
+platformBrowserDynamic().bootstrapModule(AppModule)
+  .catch(err => console.error(err));</code></pre>
+            <p><strong>Explicación del código:</strong> BrowserModule provee directivas DOM; bootstrap inicia el ciclo de vida.</p>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Con imports de features</h3>
+            <pre><code class="language-typescript">@NgModule({
+  imports: [BrowserModule, TasksModule, UsersModule],
+  // ...
+})</code></pre>
+            <p><strong>Explicación del código:</strong> Imports integra features; jerarquía de injectors hereda providers.</p>
+        </div>
+        <p><strong>Aplicación:</strong> Inicializa proyecto de tareas con AppModule importando TasksModule.</p>
+    </section>
+
+    <section id="declare-components">
+        <h2><i class="fas fa-puzzle-piece step-icon"></i> 7. Declarar Componentes en Angular</h2>
+        <p><strong>Concepto:</strong> Registra componentes en declarations para compilación y uso dentro del módulo.</p>
+        <p><strong>¿Qué es?</strong> Array en @NgModule: declarations: [MyComponent].</p>
+        <p><strong>Explicación detallada:</strong> Solo un módulo declara un componente; evita duplicados. En Angular 19, standalone omite esto, pero en módulos asegura encapsulación. CLI ng g c --module=module-name auto-declara.</p>
+        <ol>
+            <li>Genera componente: ng g c task-item.</li>
+            <li>Agrega a declarations en módulo.</li>
+            <li>Usa selector en templates del módulo.</li>
+        </ol>
+        <div class="example">
+            <h3>Ejemplo 1: Declaración manual</h3>
+            <pre><code class="language-typescript">import { NgModule } from '@angular/core';
+import { TaskItemComponent } from './task-item.component';
+
+@NgModule({
+  declarations: [TaskItemComponent],
+  // ...
+})
+export class TasksModule {}</code></pre>
+            <p><strong>Explicación del código:</strong> Angular compila template/styles de TaskItem solo si declarado aquí; accesible en imports del módulo.</p>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Múltiples con CLI</h3>
+            <pre><code class="language-bash">ng g c task-detail --module=tasks</code></pre>
+            <p><strong>Explicación del código:</strong> Auto-agrega a declarations; verifica tasks.module.ts: declarations: [..., TaskDetailComponent].</p>
+        </div>
+        <p><strong>Aplicación:</strong> Declara TaskList en TasksModule.</p>
+    </section>
+
+    <section id="summary-modules">
+        <h2><i class="fas fa-clipboard-list step-icon"></i> 8. Primer Resumen sobre Módulos en Angular</h2>
+        <p><strong>Concepto:</strong> Resumen: NgModules organizan código, declaran entidades, importan dependencias y bootstrap la app.</p>
+        <p><strong>¿Qué es?</strong> Revisión de metadatos: declarations, imports, exports, providers, bootstrap.</p>
+        <p><strong>Explicación detallada:</strong> declarations: locales; imports: dependencias; exports: compartidos; providers: DI scope; bootstrap: root entry. En Angular 19, equilibra con standalone para tree-shaking.</p>
+        <ol>
+            <li>Root: AppModule con bootstrap.</li>
+            <li>Feature: Imports en root.</li>
+            <li>Shared: Exports comunes.</li>
+        </ol>
+        <div class="example">
+            <h3>Ejemplo 1: Flujo de imports</h3>
+            <pre><code class="language-typescript">// AppModule imports TasksModule
+// TasksModule declarations TaskList
+// Uso: &lt;app-task-list&gt; en AppComponent</code></pre>
+            <p><strong>Explicación del código:</strong> Cascada: imports propagan declarations para uso.</p>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Providers scope</h3>
+            <pre><code class="language-typescript">// En FeatureModule: providers: [LocalService]
+// Servicio inyectable solo en este feature</code></pre>
+            <p><strong>Explicación del código:</strong> Limita scope para testing y performance.</p>
+        </div>
+        <p><strong>Aplicación:</strong> Resume estructura actual del proyecto.</p>
+    </section>
+
+    <section id="migrate-to-modules">
+        <h2><i class="fas fa-exchange-alt step-icon"></i> 9. Migrar Componentes a Módulos en Angular</h2>
+        <p><strong>Concepto:</strong> Agrupa standalone components en NgModules para organización en apps legacy o híbridas.</p>
+        <p><strong>¿Qué es?</strong> Mueve imports/declarations de bootstrap a @NgModule.</p>
+        <p><strong>Explicación detallada:</strong> En Angular 19, usa schematics ng g module --migrate o manual: crea módulo, declara components, importa módulo en root. Beneficios: mejor para teams grandes, lazy loading.</p>
+        <ol>
+            <li>ng g m tasks --standalone=false.</li>
+            <li>Mueve components a declarations.</li>
+            <li>Actualiza main.ts a bootstrapModule.</li>
+        </ol>
+        <div class="example">
+            <h3>Ejemplo 1: Migración manual de standalone</h3>
+            <pre><code class="language-typescript">// Antes: bootstrapApplication(AppComponent, {providers: [...]})
+// Después:
+@NgModule({
+  declarations: [AppComponent, TaskComponent],
+  bootstrap: [AppComponent]
+})
+export class AppModule {}
+
+platformBrowserDynamic().bootstrapModule(AppModule);</code></pre>
+            <p><strong>Explicación del código:</strong> Transfiere providers a módulo; elimina standalone: true en components.</p>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Con schematic</h3>
+            <pre><code class="language-bash">ng generate module tasks --migrate</code></pre>
+            <p><strong>Explicación del código:</strong> Auto-mueve declarations de app.module a tasks.module; actualiza imports.</p>
+        </div>
+        <p><strong>Aplicación:</strong> Migra TaskList standalone a TasksModule.</p>
+    </section>
+
+    <section id="shared-modules">
+        <h2><i class="fas fa-share-alt step-icon"></i> 10. Crear Módulos Compartidos en Angular</h2>
+        <p><strong>Concepto:</strong> Módulos para reutilizar componentes/pipes/directivas across features sin duplicación.</p>
+        <p><strong>¿Qué es?</strong> SharedModule con exports: [CommonComponent].</p>
+        <p><strong>Explicación detallada:</strong> No declara providers (usa forRoot si singleton); importa CommonModule. En Angular 19, alternativa a standalone imports, pero módulos evitan bootstrap bloat.</p>
+        <ol>
+            <li>ng g m shared.</li>
+            <li>Declara reutilizables, exporta.</li>
+            <li>Importa en features.</li>
+        </ol>
+        <div class="example">
+            <h3>Ejemplo 1: SharedModule para pipes</h3>
+            <pre><code class="language-typescript">import { NgModule } from '@angular/core';
+import { FilterPipe } from './filter.pipe';
+
+@NgModule({
+  declarations: [FilterPipe],
+  exports: [FilterPipe]
+})
+export class SharedModule {}</code></pre>
+            <p><strong>Explicación del código:</strong> Exporta pipe para uso en tasks/users; no imports innecesarios.</p>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Con CommonModule</h3>
+            <pre><code class="language-typescript">@NgModule({
+  imports: [CommonModule],
+  declarations: [ButtonComponent],
+  exports: [ButtonComponent, CommonModule]
+})
+export class SharedModule {}</code></pre>
+            <p><strong>Explicación del código:</strong> Re-exporta CommonModule para conveniencia en importers.</p>
+        </div>
+        <p><strong>Aplicación:</strong> SharedModule para UI comunes en tareas.</p>
+    </section>
+
+    <section id="complex-structures">
+        <h2><i class="fas fa-sitemap step-icon"></i> 11. Crear Estructuras Complejas Basadas en Módulos con Angular</h2>
+        <p><strong>Concepto:</strong> Feature modules con lazy loading para apps escalables, separando concerns.</p>
+        <p><strong>¿Qué es?</strong> CoreModule (singletons), SharedModule (reusables), FeatureModules (lazy).</p>
+        <p><strong>Explicación detallada:</strong> Estructura: src/app/core, shared, features/tasks. Lazy: loadChildren en routes. En Angular 19, híbrido con standalone routes.</p>
+        <ol>
+            <li>ng g m core --routing.</li>
+            <li>Configura lazy en app-routing.</li>
+            <li>Importa core/shared en root.</li>
+        </ol>
+        <div class="example">
+            <h3>Ejemplo 1: Feature module lazy</h3>
+            <pre><code class="language-typescript">// app-routing.module.ts
+{ path: 'tasks', loadChildren: () => import('./tasks/tasks.module').then(m => m.TasksModule) }</code></pre>
+            <pre><code class="language-typescript">// tasks.module.ts
+@NgModule({
+  imports: [RouterModule.forChild(routes)]
+})</code></pre>
+            <p><strong>Explicación del código:</strong> loadChildren carga dinámico; forChild define rutas locales.</p>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: CoreModule con guards</h3>
+            <pre><code class="language-typescript">@NgModule({
+  providers: [AuthGuard]
+})
+export class CoreModule {}</code></pre>
+            <p><strong>Explicación del código:</strong> Core para guards/interceptors globales; importa solo en AppModule.</p>
+        </div>
+        <p><strong>Aplicación:</strong> Estructura features/tasks con lazy loading.</p>
+    </section>
+
+    <section id="i18n-modules">
+        <h2><i class="fas fa-globe step-icon"></i> 12. Implementar Región Local en Abordaje por Módulos en Angular</h2>
+        <p><strong>Concepto:</strong> i18n por módulo para traducciones locales, usando Angular's built-in tooling.</p>
+        <p><strong>¿Qué es?</strong> i18n attributes en templates, extraídos por CLI a XLF files per locale.</p>
+        <p><strong>Explicación detallada:</strong> En Angular 19, i18n soporta modular: configura locales en angular.json builds. Usa --locales=es para builds; mergea XLF. Para runtime, ngx-translate, pero built-in es compile-time.</p>
+        <ol>
+            <li>Agrega i18n="@@key" en templates.</li>
+            <li>ng extract-i18n.</li>
+            <li>Traduce XLF, build con --locales.</li>
+        </ol>
+        <div class="example">
+            <h3>Ejemplo 1: i18n en template modular</h3>
+            <pre><code class="language-html">&lt;h1 i18n="@@taskTitle"&gt;Gestionar Tareas&lt;/h1&gt;
+&lt;p i18n&gt;{{task.title}} completada.&lt;/p&gt;</code></pre>
+            <p><strong>Explicación del código:</strong> @@key para placeholders; extrae a messages.xlf en tasks module.</p>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Config en angular.json</h3>
+            <pre><code class="json">"build": {
+  "builder": "@angular-devkit/build-angular:browser",
+  "options": {...},
+  "configurations": {
+    "es": {
+      "locales": {"es": "src/locale/messages.es.xlf"}
+    }
+  }
+}</code></pre>
+            <pre><code class="language-bash">ng build --configuration=es</code></pre>
+            <p><strong>Explicación del código:</strong> Builds versión española; XLF traducido manual o tool.</p>
+        </div>
+        <p><strong>Aplicación:</strong> i18n en TasksModule templates para multi-idioma.</p>
+    </section>
+</main>
+<script>
+    // Smooth scroll for nav links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+    Prism.highlightAll();
+</script>
+</body>
+</html>
