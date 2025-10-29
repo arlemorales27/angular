@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial Angular 19: Parte 6 - Fragmentación de Componentes, Proyección y Encapsulación</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 0;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        nav {
+            position: fixed;
+            left: 0;
+            top: 80px;
+            width: 250px;
+            height: calc(100vh - 80px);
+            background: white;
+            overflow-y: auto;
+            padding: 1rem 0;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        nav ul {
+            list-style: none;
+            padding: 0;
+        }
+        nav li {
+            padding: 0.5rem 1rem;
+        }
+        nav a {
+            text-decoration: none;
+            color: #333;
+            display: block;
+            transition: background 0.3s;
+        }
+        nav a:hover {
+            background: #f0f0f0;
+            border-right: 3px solid #667eea;
+        }
+        main {
+            margin-left: 250px;
+            padding: 2rem;
+            max-width: 1000px;
+        }
+        section {
+            margin-bottom: 3rem;
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            animation: fadeInUp 0.8s ease-out;
+        }
+        h1, h2, h3 {
+            color: #667eea;
+        }
+        .step-icon {
+            display: inline-block;
+            margin-right: 0.5rem;
+            color: #667eea;
+            animation: bounce 1s infinite alternate;
+        }
+        ol {
+            counter-reset: step-counter;
+        }
+        ol li {
+            counter-increment: step-counter;
+            position: relative;
+            padding-left: 2rem;
+        }
+        ol li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #667eea;
+            color: white;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+        pre {
+            background: #2d3748;
+            border-radius: 5px;
+            padding: 1rem;
+            overflow-x: auto;
+        }
+        code {
+            font-family: 'Courier New', monospace;
+        }
+        .icon-novel {
+            font-size: 2rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+            animation: pulse 2s infinite;
+        }
+        .example {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-5px); }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        @media (max-width: 768px) {
+            nav { width: 100%; position: relative; height: auto; }
+            main { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1><i class="fas fa-code"></i> Tutorial Angular 19: Parte 6 - Fragmentación de Componentes, Proyección y Encapsulación</h1>
+    <p>Profundizando en la descomposición de componentes, proyección de contenido y encapsulación de estilos en Angular 19</p>
+</header>
+<nav>
+    <ul>
+        <li><a href="#initial-project"><i class="fas fa-project-diagram"></i> Proyecto Inicial y Componentes Pequeños</a></li>
+        <li><a href="#when-split"><i class="fas fa-cut"></i> Cuándo y Cómo Dividir Componentes</a></li>
+        <li><a href="#multiple-reusable"><i class="fas fa-puzzle-piece"></i> Dividiendo en Múltiples y Reutilizables</a></li>
+        <li><a href="#inputs-review"><i class="fas fa-arrow-down"></i> Inputs: Repetición</a></li>
+        <li><a href="#property-binding"><i class="fas fa-link"></i> Property Binding: Repetición</a></li>
+        <li><a href="#ng-content-review"><i class="fas fa-project-diagram"></i> Revisar ng-content</a></li>
+        <li><a href="#forms-components"><i class="fas fa-edit"></i> Añadiendo Formularios</a></li>
+        <li><a href="#extend-elements"><i class="fas fa-expand-arrows-alt"></i> Extender Elementos Integrados</a></li>
+        <li><a href="#attribute-selectors"><i class="fas fa-tag"></i> Extender con Selectores por Atributo</a></li>
+        <li><a href="#multi-slots"><i class="fas fa-sliders-h"></i> Proyección con Múltiples Ranuras</a></li>
+        <li><a href="#advanced-projection"><i class="fas fa-rocket"></i> Proyección Avanzada</a></li>
+        <li><a href="#default-projection"><i class="fas fa-cog"></i> Valores Predeterminados</a></li>
+        <li><a href="#custom-multi"><i class="fas fa-cubes"></i> Componentes con Múltiples Elementos</a></li>
+        <li><a href="#css-encaps"><i class="fas fa-lock"></i> Limitando Estilos CSS</a></li>
+        <li><a href="#view-encaps"><i class="fas fa-shield-alt"></i> Encapsulación de Vistas</a></li>
+        <li><a href="#host-elements"><i class="fas fa-home"></i> Elementos Host</a></li>
+        <li><a href="#host-common"><i class="fas fa-building"></i> Usando Host como Comunes</a></li>
+        <li><a href="#interact-host"><i class="fas fa-handshake"></i> Interactuando con Host</a></li>
+        <li><a href="#when-host"><i class="fas fa-exclamation-triangle"></i> Cuándo (No) Confiar en Host</a></li>
+    </ul>
+</nav>
+<main>
+    <section id="initial-project" class="animate__animated animate__fadeIn">
+        <h2 class="icon-novel"><i class="fas fa-project-diagram"></i> 1. Proyecto Inicial y Componentes Más Pequeños en Angular</h2>
+        <p><strong>Concepto:</strong> En Angular 19, comienza con un componente raíz monolítico pero descompónlo en unidades pequeñas y enfocadas para mejorar mantenibilidad y testing, siguiendo el principio de single responsibility.</p>
+        <p><strong>¿Qué es?</strong> Fragmentación: Divide un componente grande (e.g., AppComponent con toda la UI de tareas) en hijos como HeaderTask, TaskListSmall, TaskItemMini para lógica aislada.</p>
+        <p><strong>Explicación detallada:</strong> Angular 19 enfatiza componentes pequeños (~100-200 líneas) para reactividad fina con Signals. Beneficios: reutilización, paralelismo en teams, lazy loading. En el proyecto, inicia con AppComponent renderizando todo, luego extrae TaskCard para items individuales. Usa CLI ng g c para generar.</p>
+        <ul>
+            <li>ng new task-app --standalone=false (para módulos si aplica).</li>
+            <li>En app.component.html, mockea UI completa.</li>
+            <li>Identifica secciones: header, lista, footer; genera componentes.</li>
+        </ul>
+        <div class="example">
+            <h3>Ejemplo 1: AppComponent inicial monolítico</h3>
+            <pre><code class="language-html">&lt;!-- app.component.html inicial --&gt;
+&lt;header&gt;&lt;h1&gt;Tareas&lt;/h1&gt;&lt;/header&gt;
+&lt;ul&gt;
+  &lt;li *ngFor="let task of tasks"&gt;{{task.title}}&lt;button&gt;Delete&lt;/button&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;footer&gt;&lt;p&gt;© 2025&lt;/p&gt;&lt;/footer&gt;</code></pre>
+            <pre><code class="language-typescript">// app.component.ts
+export class AppComponent {
+  tasks = [{id:1, title:'Aprender Angular'}];
+}</code></pre>
+            <p><strong>Explicación del código:</strong> Todo en uno: data, loop, UI; viola SRP, difícil de testear. En Angular 19, Signals como tasks = signal([]) optimizan, pero aún necesita split.</p>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Extrayendo TaskItem pequeño</h3>
+            <pre><code class="language-bash">ng g c task-item</code></pre>
+            <pre><code class="language-typescript">// task-item.component.ts
+@Component({
+  selector: 'app-task-item',
+  template: `&lt;li&gt;{{task.title}} &lt;button (click)="onDelete.emit(task.id)"&gt;Delete&lt;/button&gt;&lt;/li&gt;`
+})
+export class TaskItemComponent {
+  @Input() task!: Task;
+  @Output() onDelete = new EventEmitter&lt;number&gt;();
+}</code></pre>
+            <p><strong>Explicación del código:</strong> Pequeño: solo renderiza un item; Input para data, Output para acción. Reemplaza *ngFor li con &lt;app-task-item&gt;.</p>
+        </div>
+        <p><strong>Aplicación al proyecto:</strong> Divide App en TaskHeader, TaskListSmall para gestión de tareas escalable.</p>
+    </section>
+
+    <section id="when-split">
+        <h2><i class="fas fa-cut step-icon"></i> 2. Cuándo y Cómo Dividir Componentes en Angular</h2>
+        <p><strong>Concepto:</strong> Divide cuando un componente crece >300 líneas, tiene múltiples responsabilidades (UI, lógica, data fetch) o se reutiliza en contextos variados.</p>
+        <p><strong>¿Qué es?</strong> Reglas: si cambia por razones diferentes, split; usa herramientas como ng-refactor o manual con CLI.</p>
+        <p><strong>Explicación detallada:</strong> En Angular 19, usa analyzer tools en VSCode para métricas. Cómo: identifica subsecciones en template, extrae a nuevo componente con selector, pasa data vía Inputs/Outputs. Beneficios: mejor performance (OnPush), testing unitario. Evita over-splitting: mantén cohesión.</p>
+        <ul>
+            <li>Analiza: ¿Múltiples @Input/Output? ¿Lógica compleja en ngOnInit?</li>
+            <li>Extrae: Copia sección template a nuevo .html, mueve lógica a .ts.</li>
+            <li>Conecta: Usa selector hijo en padre, bind props.</li>
+        </ul>
+        <div class="example">
+            <h3>Ejemplo 1: Cuándo split - Lista con edición</h3>
+            <p>Componente TaskList con display + edit form: split a TaskView (display) y TaskEdit (form).</p>
+            <pre><code class="language-typescript">// Antes: TaskList maneja todo
+onEdit(task: Task) { this.editing = task; } // Mezcla display/edit</code></pre>
+            <p><strong>Explicación del código:</strong> Responsabilidades mezcladas: split reduce complejidad de 400 a 100 líneas cada uno.</p>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Cómo - ng g c task-edit</h3>
+            <pre><code class="language-html">&lt;!-- task-list.html --&gt;
+@for (t of tasks; track t.id) {
+  @if (editingId === t.id) { &lt;app-task-edit [task]="t" (save)="updateTask($event)"&gt;&lt;/app-task-edit&gt; }
+  @else { &lt;app-task-view [task]="t" (edit)="startEdit(t.id)"&gt;&lt;/app-task-view&gt; }
+}</code></pre>
+            <p><strong>Explicación del código:</strong> Condicional @if toggles views; Outputs manejan flujo, manteniendo estado en padre.</p>
+        </div>
+        <p><strong>Aplicación:</strong> En proyecto, split TaskForm de TaskDialog para reutilización.</p>
+    </section>
+
+    <section id="multiple-reusable">
+        <h2><i class="fas fa-puzzle-piece step-icon"></i> 3. Dividiendo en Múltiples Componentes con Angular y Componentes Reutilizables</h2>
+        <p><strong>Concepto:</strong> Crea jerarquías de componentes (padre > hijos > nietos) para UIs complejas, haciendo reutilizables con generics o configurables Inputs.</p>
+        <p><strong>¿Qué es?</strong> Árbol: App > Dashboard > Widget > DataCell; reutilizable si selector genérico y props flexibles.</p>
+        <p><strong>Explicación detallada:</strong> Angular 19 soporta typed Inputs para reusability. Divide: extrae sub-trees; reutiliza: usa en múltiples padres con diferentes data. Testing: mock Inputs. En proyecto, TaskDashboard > TaskSummary > TaskStat.</p>
+        <ul>
+            <li>Identifica patrones repetidos (e.g., cards).</li>
+            <li>Genera: ng g c reusable-card.</li>
+            <li>Instancia: &lt;app-card [config]="cardConfig"&gt;&lt;/app-card&gt; en múltiples lugares.</li>
+        </ul>
+        <div class="example">
+            <h3>Ejemplo 1: Dividiendo TaskDashboard</h3>
+            <pre><code class="language-typescript">// task-dashboard.component.ts
+@Component({
+  template: `&lt;app-task-summary [tasks]="tasks"&gt;&lt;/app-task-summary&gt;
+             &lt;app-task-stats [data]="stats"&gt;&lt;/app-task-stats&gt;`
+})
+export class TaskDashboardComponent {
+  tasks = signal([]); stats = computed(() => ...);
+}</code></pre>
+            <p><strong>Explicación del código:</strong> Dashboard orquesta; hijos manejan sub-lógica, reduciendo monolito.</p>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Reutilizable TaskCard</h3>
+            <pre><code class="language-typescript">@Component({
+  template: `&lt;div class="card" [class]="type"&gt;&lt;ng-content&gt;&lt;/ng-content&gt;&lt;/div&gt;`
+})
+export class TaskCardComponent {
+  @Input() type: 'info' | 'warning' = 'info';
+}</code></pre>
+            <p><strong>Explicación del código:</strong> Reutiliza en listas/forms con diferentes types; ng-content para custom content.</p>
+        </div>
+        <p><strong>Aplicación:</strong> Reutiliza TaskCard en Dashboard y Reports.</p>
+    </section>
+
+    <section id="inputs-review">
+        <h2><i class="fas fa-arrow-down step-icon"></i> 4. Inputs de Componentes en Angular: Repetición</h2>
+        <p><strong>Concepto:</strong> Inputs permiten flujo de data de padre a hijo, configurando comportamiento dinámico en Angular 19 con typed Signals.</p>
+        <p><strong>¿Qué es?</strong> input&lt;T&gt;() para required/optional; bind con [input]="value".</p>
+        <p><strong>Explicación detallada:</strong> Repaso: required() lanza error si no bind; defaults con input(default). En 19, integra con model() para two-way. Usa en reutilizables para flexibilidad.</p>
+        <ul>
+            <li>Declara: name = input.required&lt;string&gt;();</li>
+            <li>Lee: {{name()}} en template.</li>
+            <li>Transforma: computed(() => name().toUpperCase()).</li>
+        </ul>
+        <div class="example">
+            <h3>Ejemplo 1: Input required</h3>
+            <pre><code class="language-typescript">export class GreetingComponent {
+  message = input.required&lt;string&gt;();
+}</code></pre>
+            <pre><code class="language-html">&lt;app-greeting [message]="userName"&gt;&lt;/app-greeting&gt;</code></pre>
+            <p><strong>Explicación del código:</strong> Si no bind, error en dev; asegura props críticas.</p>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Input optional con default</h3>
+            <pre><code class="language-typescript">theme = input('light' as 'light' | 'dark');</code></pre>
+            <pre><code class="language-html">&lt;div [class.dark]="theme() === 'dark'"&gt;{{message()}}&lt;/div&gt;</code></pre>
+            <p><strong>Explicación del código:</strong> Default 'light'; bind [theme]="userTheme" para override.</p>
+        </div>
+        <p><strong>Aplicación:</strong> Inputs en TaskItem para title, completed.</p>
+    </section>
+
+    <section id="property-binding">
+        <h2><i class="fas fa-link step-icon"></i> 5. Vinculación de Propiedades (Property Binding) en Angular: Repetición</h2>
+        <p><strong>Concepto:</strong> [prop]="expr" une propiedades DOM/component a expresiones, actualizando reactivamente.</p>
+        <p><strong>¿Qué es?</strong> One-way binding de componente a view; usa [] para dinámico vs string static.</p>
+        <p><strong>Explicación detallada:</strong> En Angular 19, con Signals, bindings track dependencias finas. Repaso: para attrs usa [attr.], para props [disabled]. Sanitiza con DomSanitizer si needed.</p>
+        <ul>
+            <li>Expresión: [src]="imageUrl".</li>
+            <li>Calculada: [style.width.px]="width".</li>
+            <li>Eventual: [hidden]="!visible()".</li>
+        </ul>
+        <div class="example">
+            <h3>Ejemplo 1: Binding básico a img</h3>
+            <pre><code class="language-html">&lt;img [src]="task.avatar" [alt]="task.name" [class.active]="task.active"&gt;</code></pre>
+            <pre><code class="language-typescript">task = {avatar: 'user.jpg', name: 'Juan', active: true};</code></pre>
+            <p><strong>Explicación del código:</strong> Cambios en task actualizan DOM; class para CSS condicional.</p>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Binding calculado</h3>
+            <pre><code class="language-html">&lt;div [style.background-color]="priorityColor()"&gt;{{task.title}}&lt;/div&gt;</code></pre>
+            <pre><code class="language-typescript">priorityColor = computed(() => this.task().priority === 'high' ? 'red' : 'green');</code></pre>
+            <p><strong>Explicación del código:</strong> computed re-evalúa solo si task.priority cambia; eficiente en 19.</p>
+        </div>
+        <p><strong>Aplicación:</strong> Bind [completed] en TaskItem checkboxes.</p>
+    </section>
+
+    <section id="ng-content-review">
+        <h2><i class="fas fa-project-diagram step-icon"></i> 6. Revisar la Proyección de Contenido con ng-content en Angular</h2>
+        <p><strong>Concepto:</strong> ng-content proyecta contenido del padre en el hijo, permitiendo templates custom sin hardcode.</p>
+        <p><strong>¿Qué es?</strong> &lt;ng-content&gt;&lt;/ng-content&gt; como placeholder en template hijo.</p>
+        <p><strong>Explicación detallada:</strong> Repaso: transclude children; en 19, combina con @ContentChildren para query. Útil para wrappers como Card: proyecta header/body/footer.</p>
+        <ul>
+            <li>En hijo: &lt;ng-content&gt;&lt;/ng-content&gt;.</li>
+            <li>En padre: &lt;app-card&gt;Contenido&lt;/app-card&gt;.</li>
+            <li>Query: @ContentChildren('slot') content.</li>
+        </ul>
+        <div class="example">
+            <h3>Ejemplo 1: ng-content simple</h3>
+            <pre><code class="language-typescript">// card.component.ts
+template: `&lt;div class="card"&gt;&lt;ng-content&gt;&lt;/ng-content&gt;&lt;/div&gt;`
+</code></pre>
+            <pre><code class="language-html">&lt;app-card&gt;&lt;p&gt;Proyectado!&lt;/p&gt;&lt;/app-card&gt;</code></pre>
+            <p><strong>Explicación del código:</strong> <p> se inserta en .card; flexibilidad sin recargar template.</p>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Con @ContentChildren</h3>
+            <pre><code class="language-typescript">import { ContentChildren, QueryList } from '@angular/core';
+
+@ContentChildren('header') headers!: QueryList&lt;ElementRef&gt;;
+
+ngAfterContentInit() {
+  this.headers.forEach(h => console.log(h.nativeElement.textContent));
+}</code></pre>
+            <p><strong>Explicación del código:</strong> Query slots post-proyección; en 19, typed queries mejoran DX.</p>
+        </div>
+        <p><strong>Aplicación:</strong> Proyecta forms en TaskDialog.</p>
+    </section>
+
+    <section id="forms-components">
+        <h2><i class="fas fa-edit step-icon"></i> 7. Añadiendo Formularios a Componentes en Angular</h2>
+        <p><strong>Concepto:</strong> Integra ReactiveFormsModule o Template-driven en componentes para manejo de user input.</p>
+        <p><strong>¿Qué es?</strong> FormGroup/FormControl en .ts, bind con [formGroup] o ngModel.</p>
+        <p><strong>Explicación detallada:</strong> En Angular 19, typed forms (FormGroup&lt;{title: FormControl&lt;string&gt;}&gt;) para safety. Template-driven para simple, reactive para complex. Valida con Validators.required.</p>
+        <ul>
+            <li>Importa FormsModule/ReactiveFormsModule.</li>
+            <li>Crea FormGroup en ngOnInit.</li>
+            <li>Bind: &lt;form [formGroup]="taskForm"&gt;.</li>
+        </ul>
+        <div class="example">
+            <h3>Ejemplo 1: Reactive form básico</h3>
+            <pre><code class="language-typescript">import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+
+export class TaskFormComponent implements OnInit {
+  taskForm: FormGroup;
+  constructor(private fb: FormBuilder) {
+    this.taskForm = this.fb.group({
+      title: ['', Validators.required],
+      description: ['']
+    });
+  }
+
+  onSubmit() {
+    if (this.taskForm.valid) console.log(this.taskForm.value);
+  }
+}</code></pre>
+            <p><strong>Explicación del código:</strong> fb.group tipa controles; validación reactiva, valueChanges observable.</p>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Template-driven</h3>
+            <pre><code class="language-html">&lt;form #taskForm="ngForm" (ngSubmit)="onSubmit(taskForm)"&gt;
+  &lt;input ngModel name="title" required #title="ngModel"&gt;
+  &lt;div *ngIf="title.invalid"&gt;Requerido&lt;/div&gt;
+&lt;/form&gt;</code></pre>
+            <p><strong>Explicación del código:</strong> #ref para access; simple para forms no-complex, pero reactive preferido en 19.</p>
+        </div>
+        <p><strong>Aplicación:</strong> Form en TaskEdit para update tareas.</p>
+    </section>
+
+    <section id="extend-elements">
+        <h2><i class="fas fa-expand-arrows-alt step-icon"></i> 8. Extender Elementos Integrados en Angular</h2>
+        <p><strong>Concepto:</strong> Usa selectores de tag (e.g., selector: 'my-button') para extender elementos como button con superpoderes.</p>
+        <p><strong>¿Qué es?</strong> Componente que se comporta como tag nativo pero con lógica extra.</p>
+        <p><strong>Explicación detallada:</strong> En Angular 19, usa host: {class: 'btn'} para mimic. Útil para UI kits: my-input extends input con validation.</p>
+        <ul>
+            <li>selector: 'my-input'.</li>
+            <li>template: &lt;input&gt; con bindings.</li>
+            <li>Usa: &lt;my-input&gt;&lt;/my-input&gt; como tag.</li>
+        </ul>
+        <div class="example">
+            <h3>Ejemplo 1: Extender button</h3>
+            <pre><code class="language-typescript">@Component({
+  selector: 'my-button',
+  template: `&lt;button [disabled]="disabled" (click)="onClick()"&gt;&lt;ng-content&gt;&lt;/ng-content&gt;&lt;/button&gt;`,
+  host: {'class': 'btn'}
+})
+export class MyButtonComponent {
+  @Input() disabled = false;
+  @Output() clicked = new EventEmitter();
+  onClick() { this.clicked.emit(); }
+}</code></pre>
+            <p><strong>Explicación del código:</strong> Proyecta text; host añade class global; usa como &lt;my-button&gt;Save&lt;/my-button&gt;.</p>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Extender div como panel</h3>
+            <pre><code class="language-typescript">selector: 'my-panel',
+template: `&lt;div [class.open]="open"&gt;&lt;ng-content&gt;&lt;/ng-content&gt;&lt;/div&gt;`,
+@Input() open = false;</code></pre>
+            <p><strong>Explicación del código:</strong> Toggle class; extensible para accordions.</p>
+        </div>
+        <p><strong>Aplicación:</strong> my-task-button para actions uniformes.</p>
+    </section>
+
+    <section id="attribute-selectors">
+        <h2><i class="fas fa-tag step-icon"></i> 9. Extender Elementos Integrados con Selectores por Atributo en Angular</h2>
+        <p><strong>Concepto:</strong> selector: '[my-input]' aplica a cualquier elemento con atributo my-input, extendiendo sin reemplazar tag.</p>
+        <p><strong>¿Qué es?</strong> Directive-like component: &lt;input my-input&gt; añade features al input existente.</p>
+        <p><strong>Explicación detallada:</strong> En 19, ideal para progressive enhancement; usa @HostListener para eventos nativos. Diferencia de directives: components tienen template, pero con empty, actúa como directive.</p>
+        <ul>
+            <li>selector: '[app-tooltip]'.</li>
+            <li>Template vacío o wrapper.</li>
+            <li>Aplica: &lt;button app-tooltip="Help"&gt;Btn&lt;/button&gt;.</li>
+        </ul>
+        <div class="example">
+            <h3>Ejemplo 1: Tooltip attribute</h3>
+            <pre><code class="language-typescript">@Component({
+  selector: '[app-tooltip]',
+  template: ``, // Vacío, modifica host
+  host: {
+    '[title]': 'tooltipText',
+    '[attr.aria-label]': 'tooltipText'
+  }
+})
+export class TooltipComponent {
+  @Input() appTooltip: string = '';
+  @HostBinding('attr.title') tooltipText = '';
+  ngOnChanges() { this.tooltipText = this.appTooltip; }
+}</code></pre>
+            <p><strong>Explicación del código:</strong> @HostBinding bind a host element; aplica a cualquier tag con app-tooltip.</p>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Validated input</h3>
+            <pre><code class="language-typescript">selector: '[app-validated]',
+host: {'[class.invalid]': '!isValid'},
+@Input() appValidated: string = '';
+isValid = computed(() => this.appValidated.length > 3);</code></pre>
+            <p><strong>Explicación del código:</strong> Añade class basada en input value; &lt;input app-validated [(ngModel)]="val"&gt;.</p>
+        </div>
+        <p><strong>Aplicación:</strong> app-task-input para inputs validados en forms.</p>
+    </section>
+
+    <section id="multi-slots">
+        <h2><i class="fas fa-sliders-h step-icon"></i> 10. Proyección de Contenido con Múltiples Ranuras en Angular</h2>
+        <p><strong>Concepto:</strong> Múltiples &lt;ng-content select="selector"&gt; para slots nombrados, organizando contenido proyectado.</p>
+        <p><strong>¿Qué es?</strong> Slots como header/body/footer; select por tag/class/attr.</p>
+        <p><strong>Explicación detallada:</strong> En 19, @ContentChildren query por slot; fallback con ng-content sin select. Mejora composabilidad para layouts.</p>
+        <ol>
+            <li>Define slots en template hijo.</li>
+            <li>Proyecta con &lt;div slot="header"&gt; en padre.</li>
+            <li>Query si needed.</li>
+        </ol>
+        <div class="example">
+            <h3>Ejemplo 1: Slots por tag</h3>
+            <pre><code class="language-typescript">// layout.component.ts
+template: `&lt;header&gt;&lt;ng-content select="header"&gt;&lt;/ng-content&gt;&lt;/header&gt;
+           &lt;main&gt;&lt;ng-content select="[body]"&gt;&lt;/ng-content&gt;&lt;/main&gt;
+           &lt;footer&gt;&lt;ng-content&gt;&lt;/ng-content&gt;&lt;/footer&gt;`</code></pre>
+            <p><strong>Explicación del código:</strong> select="header" matches &lt;header&gt;; [body] por attr.</p>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Por class</h3>
+            <pre><code class="language-html">&lt;app-layout&gt;
+  &lt;header class="slot-header"&gt;Head&lt;/header&gt;
+  &lt;section class="slot-body"&gt;Body&lt;/section&gt;
+&lt;/app-layout&gt;</code></pre>
+            <pre><code class="language-typescript">template: `&lt;ng-content select=".slot-header"&gt;&lt;/ng-content&gt;`</code></pre>
+            <p><strong>Explicación del código:</strong> Flexible: class permite múltiples elementos.</p>
+        </div>
+        <p><strong>Aplicación:</strong> Slots en TaskCard para title/actions.</p>
+    </section>
+
+    <section id="advanced-projection">
+        <h2><i class="fas fa-rocket step-icon"></i> 11. Explorando Proyección de Contenido Avanzada en Angular</h2>
+        <p><strong>Concepto:</strong> @ContentChildren y ng-template outlet para manipular proyectado dinámicamente, como sorting o conditional render.</p>
+        <p><strong>¿Qué es?</strong> QueryList para access children post-ngAfterContentInit; outlet para dynamic insertion.</p>
+        <p><strong>Explicación detallada:</strong> En 19, typed @ContentChildren&lt;Type&gt;; changes subscription para reactividad. Útil para tabs o dynamic forms.</p>
+        <ol>
+            <li>@ContentChildren(TabComponent) tabs!: QueryList&lt;TabComponent&gt;.</li>
+            <li>En ngAfterContentInit: this.tabs.changes.subscribe(...).</li>
+            <li>Render: @for (tab of tabs; track tab.id) { &lt;ng-container *ngTemplateOutlet="tab.template"&gt; }.</li>
+        </ol>
+        <div class="example">
+            <h3>Ejemplo 1: Dynamic tabs</h3>
+            <pre><code class="language-typescript">@ContentChildren(TabComponent) tabs!: QueryList&lt;TabComponent&gt;;
+
+ngAfterContentInit() {
+  this.tabs.forEach(tab => tab.selectable = true);
+}</code></pre>
+            <p><strong>Explicación del código:</strong> Modifica proyectados; changes detecta adds/removes.</p>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Conditional projection</h3>
+            <pre><code class="language-html">@if (showContent) { &lt;ng-content&gt;&lt;/ng-content&gt; }</code></pre>
+            <p><strong>Explicación del código:</strong> @if filtra; combina con @ContentChild para single.</p>
+        </div>
+        <p><strong>Aplicación:</strong> Dynamic slots en TaskLayout para conditional panels.</p>
+    </section>
+
+    <section id="default-projection">
+        <h2><i class="fas fa-cog step-icon"></i> 12. Definiendo Valores Predeterminados para Proyección de Contenido en Angular</h2>
+        <p><strong>Concepto:</strong> Usa &lt;ng-content&gt; con fallback templates para defaults si no proyectado.</p>
+        <p><strong>¿Qué es?</strong> ng-template #default dentro ng-content o @else-like.</p>
+        <p><strong>Explicación detallada:</strong> En 19, usa @if para conditional fallback; asegura UX si padre olvida content.</p>
+        <ol>
+            <li>&lt;ng-content&gt;&lt;ng-template #default&gt;Default&lt;/ng-template&gt;&lt;/ng-content&gt;.</li>
+            <li>Pero mejor: @if (hasContent) { ng-content } @else { default }.</li>
+            <li>Check: @ContentChild check.</li>
+        </ol>
+        <div class="example">
+            <h3>Ejemplo 1: Fallback template</h3>
+            <pre><code class="language-html">&lt;ng-content select="icon"&gt;
+  &lt;ng-template&gt;&lt;i class="fas fa-info"&gt;&lt;/i&gt;&lt;/ng-template&gt;
+&lt;/ng-content&gt;</code></pre>
+            <p><strong>Explicación del código:</strong> Si no <icon>, usa default icon; legacy way.</p>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Con @ContentChild</h3>
+            <pre><code class="language-typescript">@ContentChild('icon', {static: false}) iconTpl?: TemplateRef;
+
+template: `@if (iconTpl) { &lt;ng-container *ngTemplateOutlet="iconTpl"&gt; }
+           @else { &lt;i class="default-icon"&gt; &lt;/i&gt; }`</code></pre>
+            <p><strong>Explicación del código:</strong> Query template; outlet renders it o default.</p>
+        </div>
+        <p><strong>Aplicación:</strong> Default empty state en TaskList si no tasks.</p>
+    </section>
+
+    <section id="custom-multi">
+        <h2><i class="fas fa-cubes step-icon"></i> 13. Componentes Personalizados con Múltiples Elementos y Proyección de Contenido</h2>
+        <p><strong>Concepto:</strong> Componentes que proyectan múltiples hijos, como grids o forms con sections.</p>
+        <p><strong>¿Qué es?</strong> ng-content múltiple + logic para layout de proyectados.</p>
+        <p><strong>Explicación detallada:</strong> En 19, usa ViewChildren para DOM manip; ideal para custom tags como <my-grid> <row> <cell> </cell> </row> </my-grid>.</p>
+        <ol>
+            <li>Slots para row/cell.</li>
+            <li>@ContentChildren(RowComponent) rows.</li>
+            <li>Render en grid CSS.</li>
+        </ol>
+        <div class="example">
+            <h3>Ejemplo 1: Custom form sections</h3>
+            <pre><code class="language-typescript">template: `&lt;form&gt;
+  &lt;ng-content select="[section]"&gt;&lt;/ng-content&gt;
+&lt;/form&gt;`</code></pre>
+            <pre><code class="language-html">&lt;my-form&gt;
+  &lt;div section&gt;&lt;input name="title"&gt;&lt;/div&gt;
+  &lt;div section&gt;&lt;input name="desc"&gt;&lt;/div&gt;
+&lt;/my-form&gt;</code></pre>
+            <p><strong>Explicación del código:</strong> Proyecta sections; aplica styles por slot.</p>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Grid con rows</h3>
+            <pre><code class="language-typescript">@ContentChildren(RowDirective) rows: QueryList&lt;RowDirective&gt;;
+ngAfterContentInit() { this.rows.forEach(row => row.cells.forEach(cell => ...)); }</code></pre>
+            <p><strong>Explicación del código:</strong> Accede a nested proyectados; builds dynamic grid.</p>
+        </div>
+        <p><strong>Aplicación:</strong> MyTaskForm con sections para basic/advanced.</p>
+    </section>
+
+    <section id="css-encaps">
+        <h2><i class="fas fa-lock step-icon"></i> 14. Limitando Estilos CSS a Componentes en Angular</h2>
+        <p><strong>Concepto:</strong> Encapsulación por default (ViewEncapsulation.Emulated) añade atributos únicos para scopes CSS.</p>
+        <p><strong>¿Qué es?</strong> ::ng-deep o /deep/ para pierce, pero deprecated; usa :host para target propio.</p>
+        <p><strong>Explicación detallada:</strong> En 19, prefiere Shadow DOM (Native) para true isolation. Emulated: _ngcontent-abc attrs. Limita leaks.</p>
+        <ol>
+            <li>Estilos en .component.css aplican solo al componente.</li>
+            <li>Para global: en styles.css.</li>
+            <li>Config: encapsulation: ViewEncapsulation.None para no scope.</li>
+        </ol>
+        <div class="example">
+            <h3>Ejemplo 1: Estilos encapsulados</h3>
+            <pre><code class="language-css">/* task-item.component.css */
+:host { display: block; }
+.task-title { color: blue; } /* Solo en este comp */</code></pre>
+            <p><strong>Explicación del código:</strong> Angular añade [attr._ngcontent-xxx] a elements; no afecta otros .task-title.</p>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: :host selector</h3>
+            <pre><code class="language-css">:host(.active) { background: yellow; }
+:host ::ng-deep .deep-child { color: red; } /* Legacy pierce */</code></pre>
+            <p><strong>Explicación del código:</strong> :host targets root; ::ng-deep para projected, pero usa part() en 19.</p>
+        </div>
+        <p><strong>Aplicación:</strong> Estilos locales en TaskItem sin leak a lista.</p>
+    </section>
+
+    <section id="view-encaps">
+        <h2><i class="fas fa-shield-alt step-icon"></i> 15. Entendiendo y Configurando la Encapsulación de Vistas en Angular</h2>
+        <p><strong>Concepto:</strong> ViewEncapsulation modos: Emulated (default, emula shadow), None (global), ShadowDom (native).</p>
+        <p><strong>¿Qué es?</strong> @Component({encapsulation: ViewEncapsulation.ShadowDom}).</p>
+        <p><strong>Explicación detallada:</strong> Emulated: safe para legacy browsers; ShadowDom: true isolation pero no styles in. Config por comp; en 19, mejor perf con Native.</p>
+        <ol>
+            <li>Import ViewEncapsulation.</li>
+            <li>Set en @Component.</li>
+            <li>Test: inspect DOM attrs.</li>
+        </ol>
+        <div class="example">
+            <h3>Ejemplo 1: ShadowDom config</h3>
+            <pre><code class="language-typescript">import { ViewEncapsulation } from '@angular/core';
+
+@Component({
+  encapsulation: ViewEncapsulation.ShadowDom,
+  styles: ['.shadow { color: green; }']
+})
+export class IsolatedComponent {}</code></pre>
+            <p><strong>Explicación del código:</strong> Styles solo en shadow root; no afecta outside.</p>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: None para global</h3>
+            <pre><code class="language-typescript">encapsulation: ViewEncapsulation.None,
+styles: ['h1 { font-size: 2em; }'] /* Afecta toda app */</code></pre>
+            <p><strong>Explicación del código:</strong> Útil para themes globales; riesgo de leaks.</p>
+        </div>
+        <p><strong>Aplicación:</strong> ShadowDom en TaskCard para UI isolation.</p>
+    </section>
+
+    <section id="host-elements">
+        <h2><i class="fas fa-home step-icon"></i> 16. Entendiendo los Elementos Host de Componentes en Angular</h2>
+        <p><strong>Concepto:</strong> El host es el elemento DOM donde se instancia el componente (e.g., &lt;app-root&gt;).</p>
+        <p><strong>¿Qué es?</strong> Accede/modifica via @HostBinding/@HostListener.</p>
+        <p><strong>Explicación detallada:</strong> En 19, host metadata en @Component para static bindings. Útil para attributes dinámicos sin template.</p>
+        <ol>
+            <li>host: {'[attr.role]': 'button'}.</li>
+            <li>@HostBinding('class.active') isActive = false.</li>
+            <li>@HostListener('click') onHostClick().</li>
+        </ol>
+        <div class="example">
+            <h3>Ejemplo 1: Host metadata</h3>
+            <pre><code class="language-typescript">@Component({
+  host: {
+    '[id]': 'myComp',
+    '[class.highlight]': 'isHighlighted()',
+    '(mouseenter)': 'onMouseEnter()'
+  }
+})
+export class MyComp { isHighlighted = () => true; }</code></pre>
+            <p><strong>Explicación del código:</strong> Bind dinámico al host; (event) como @HostListener.</p>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: @HostBinding</h3>
+            <pre><code class="language-typescript">@HostBinding('style.background') bgColor = 'white';
+@HostBinding('attr.tabindex') tabIndex = 0;
+ngOnInit() { this.bgColor = 'lightblue'; }</code></pre>
+            <p><strong>Explicación del código:</strong> Cambios actualizan host attrs/styles reactivamente.</p>
+        </div>
+        <p><strong>Aplicación:</strong> Host classes en TaskItem para hover states.</p>
+    </section>
+
+    <section id="host-common">
+        <h2><i class="fas fa-building step-icon"></i> 17. Usando Elementos Host como Elementos Comunes en Angular</h2>
+        <p><strong>Concepto:</strong> Haz componentes "invisible" modificando solo host, actuando como directives comunes.</p>
+        <p><strong>¿Qué es?</strong> Template vacío + host bindings para enhance any element.</p>
+        <p><strong>Explicación detallada:</strong> En 19, combina con attribute selectors; útil para accessibility o behaviors sin wrapper DOM extra.</p>
+        <ol>
+            <li>selector: 'button[app-clickable]'.</li>
+            <li>Template: ``.</li>
+            <li>Host: ripple effect o ARIA.</li>
+        </ol>
+        <div class="example">
+            <h3>Ejemplo 1: Click tracker</h3>
+            <pre><code class="language-typescript">@Component({
+  selector: '[app-click-tracker]',
+  template: '',
+  host: {
+    '(click)': 'trackClick($event)'
+  }
+})
+export class ClickTrackerComponent {
+  trackClick(e: Event) { console.log('Clicked:', e.target); }
+}</code></pre>
+            <p><strong>Explicación del código:</strong> Añade behavior a existing buttons; no extra DOM.</p>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: ARIA enhancer</h3>
+            <pre><code class="language-typescript">@HostBinding('attr.aria-label') label = 'Interactive element';
+@Input() appAriaLabel: string;
+ngOnChanges() { this.label = this.appAriaLabel || 'Default'; }</code></pre>
+            <p><strong>Explicación del código:</strong> Mejora accessibility; aplica a any tag.</p>
+        </div>
+        <p><strong>Aplicación:</strong> app-task-focus para inputs auto-focus.</p>
+    </section>
+
+    <section id="interact-host">
+        <h2><i class="fas fa-handshake step-icon"></i> 18. Interactuando con Elementos Host Desde Dentro de los Componentes en Angular</h2>
+        <p><strong>Concepto:</strong> Usa ElementRef para access/modify host DOM directamente, o Renderer2 para platform-agnostic.</p>
+        <p><strong>¿Qué es?</strong> @ViewChild('host', {static: true}) host: ElementRef; o inject(ElementRef).</p>
+        <p><strong>Explicación detallada:</strong> En 19, prefiere Renderer2 para SSR safety. Interact: add classes, set props, listen events beyond @HostListener.</p>
+        <ol>
+            <li>constructor(private el: ElementRef, private renderer: Renderer2).</li>
+            <li>ngOnInit: this.renderer.addClass(this.el.nativeElement, 'custom').</li>
+            <li>Clean: ngOnDestroy remove.</li>
+        </ol>
+        <div class="example">
+            <h3>Ejemplo 1: Add class dinámico</h3>
+            <pre><code class="language-typescript">import { ElementRef, Renderer2 } from '@angular/core';
+
+constructor(private el: ElementRef, private renderer: Renderer2) {}
+
+ngOnInit() {
+  this.renderer.addClass(this.el.nativeElement, 'animated');
+  this.renderer.setStyle(this.el.nativeElement, 'transition', 'all 0.3s');
+}</code></pre>
+            <p><strong>Explicación del código:</strong> Modifica host; Renderer2 safe para webview.</p>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Listen custom event</h3>
+            <pre><code class="language-typescript">ngOnInit() {
+  fromEvent(this.el.nativeElement, 'customEvent').subscribe(e => console.log(e));
+}</code></pre>
+            <p><strong>Explicación del código:</strong> fromEvent para beyond built-in; unsubscribe en destroy.</p>
+        </div>
+        <p><strong>Aplicación:</strong> Animate host en TaskItem on hover.</p>
+    </section>
+
+    <section id="when-host">
+        <h2><i class="fas fa-exclamation-triangle step-icon"></i> 19. Cuándo (No) Confiar en los Elementos Host en Angular</h2>
+        <p><strong>Concepto:</strong> Usa host para simple enhancements; evita para complex logic (mejor directives/components separados).</p>
+        <p><strong>¿Qué es?</strong> Pros: lightweight; cons: tight coupling a DOM, hard test, no projection.</p>
+        <p><strong>Explicación detallada:</strong> En 19, con web components trend, host bueno para custom elements; no confíes para stateful (usa services). Cuándo no: si necesitas children o templates.</p>
+        <ol>
+            <li>Usa: Para attributes/events simples.</li>
+            <li>No: Para wrappers con content.</li>
+            <li>Alternativa: Structural directives.</li>
+        </ol>
+        <div class="example">
+            <h3>Ejemplo 1: Bueno - Simple attr</h3>
+            <p>app-aria para labels: host binding, no template needed.</p>
+            <p><strong>Explicación del código:</strong> Bajo overhead; testable via unit.</p>
+        </div>
+        <div class="example">
+            <h3>Ejemplo 2: Malo - Complex animation</h3>
+            <pre><code class="language-typescript">// Evita: Manip DOM heavy en host
+ngOnInit() { /* Animate nativeElement con JS */ } // Hard SSR, test</code></pre>
+            <p><strong>Explicación del código:</strong> Mejor: CSS transitions + @HostBinding class.</p>
+        </div>
+        <p><strong>Aplicación:</strong> Usa host sparingly en TaskButton; full comp para TaskForm.</p>
+    </section>
+</main>
+<script>
+    // Smooth scroll for nav links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+    Prism.highlightAll();
+</script>
+</body>
+</html>
