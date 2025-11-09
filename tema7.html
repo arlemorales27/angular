@@ -1,0 +1,2112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial Angular 19: Parte 7 - Características Avanzadas y Ciclo de Vida</title>
+    <link rel="stylesheet" href="./assets/css/prism-tomorrow.min.css">
+    <script src="./assets/js/prism.min.js"></script>
+    <script src="./assets/js/prism-typescript.min.js"></script>
+    <link rel="stylesheet" href="./assets/css/all.min.css">
+    <link rel="stylesheet" href="./assets/css/animate.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 0;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        nav {
+            position: fixed;
+            left: 0;
+            top: 80px;
+            width: 250px;
+            height: calc(100vh - 80px);
+            background: white;
+            overflow-y: auto;
+            padding: 1rem 0;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        nav ul {
+            list-style: none;
+            padding: 0;
+        }
+        nav li {
+            padding: 0.5rem 1rem;
+        }
+        nav a {
+            text-decoration: none;
+            color: #333;
+            display: block;
+            transition: background 0.3s;
+        }
+        nav a:hover {
+            background: #f0f0f0;
+            border-right: 3px solid #667eea;
+        }
+        main {
+            margin-left: 250px;
+            padding: 2rem;
+            max-width: 1000px;
+            counter-reset: theme-counter;
+        }
+        section {
+            margin-bottom: 3rem;
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            animation: fadeInUp 0.8s ease-out;
+        }
+        section h2 {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.4rem;
+        }
+        section h2::before {
+            counter-increment: theme-counter;
+            content: counter(theme-counter);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.1rem;
+            height: 2.1rem;
+            background: linear-gradient(135deg, #5a67d8 0%, #7b61d1 100%);
+            color: white;
+            border-radius: 50%;
+            font-weight: 700;
+            box-shadow: 0 4px 10px rgba(102,126,234,0.18);
+            transform: translateY(0);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        section:hover h2::before {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 18px rgba(102,126,234,0.22);
+        }
+        section h2 i {
+            color: #667eea;
+            font-size: 1.15rem;
+            transition: transform 0.35s cubic-bezier(.2,.8,.2,1), color 0.35s;
+            will-change: transform;
+        }
+        @keyframes iconFloat {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+            100% { transform: translateY(0); }
+        }
+        section h2 i.animate-icon {
+            animation: iconFloat 3.5s ease-in-out infinite;
+            opacity: 0.95;
+        }
+        section h2:hover i {
+            transform: translateY(-3px) scale(1.06);
+            color: #5a67d8;
+        }
+        @media (max-width: 600px) {
+            section h2::before { width: 1.8rem; height: 1.8rem; font-size: 0.95rem; }
+            section h2 { font-size: 1.15rem; }
+        }
+
+        /* --- Fin de estilos añadidos --- */
+
+        ol {
+            counter-reset: step-counter;
+        }
+        ol li {
+            counter-increment: step-counter;
+            position: relative;
+            padding-left: 2rem;
+        }
+        ol li::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: 0;
+            top: 0;
+            background: #667eea;
+            color: white;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+        pre {
+            background: #2d2d2d;
+            color: #ccc;
+            padding: 1rem;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        code {
+            font-family: 'Fira Code', monospace;
+        }
+        .note {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .tip {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .warning {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Tutorial Angular 19: Parte 7 - Características Avanzadas y Ciclo de Vida</h1>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="#host-interactions"><i class="fas fa-code"></i> Interacción con Host</a></li>
+            <li><a href="#element-access"><i class="fas fa-sitemap"></i> Acceso a Elementos</a></li>
+            <li><a href="#css-classes"><i class="fas fa-paint-brush"></i> Enlace de Clases CSS</a></li>
+            <li><a href="#inline-styles"><i class="fas fa-palette"></i> Estilos en Línea</a></li>
+            <li><a href="#state-management"><i class="fas fa-database"></i> Gestión de Estado</a></li>
+            <li><a href="#lifecycle"><i class="fas fa-circle-notch"></i> Ciclo de Vida</a></li>
+            <li><a href="#view-content"><i class="fas fa-eye"></i> ViewChild y ContentChild</a></li>
+            <li><a href="#signal-effects"><i class="fas fa-signal"></i> Signal Effects</a></li>
+            <li><a href="#component-communication"><i class="fas fa-exchange-alt"></i> Comunicación</a></li>
+            <li><a href="#two-way-binding"><i class="fas fa-sync"></i> Vinculación Bidireccional</a></li>
+            <li><a href="#template-variables"><i class="fas fa-hashtag"></i> Variables de Plantilla</a></li>
+            <li><a href="#cleanup"><i class="fas fa-broom"></i> Limpieza de Componentes</a></li>
+            <li><a href="#signals-advanced"><i class="fas fa-atom"></i> Signals Avanzados</a></li>
+            <li><a href="#form-handling"><i class="fas fa-wpforms"></i> Manejo de Formularios</a></li>
+            <li><a href="#template-values"><i class="fas fa-keyboard"></i> Extracción de Valores</a></li>
+            <li><a href="#template-components"><i class="fas fa-puzzle-piece"></i> Variables y Componentes</a></li>
+            <li><a href="#viewchild-usage"><i class="fas fa-search"></i> ViewChild Avanzado</a></li>
+            <li><a href="#signal-viewchild"><i class="fas fa-link"></i> Signal con ViewChild</a></li>
+            <li><a href="#viewchild-contentchild"><i class="fas fa-project-diagram"></i> ViewChild vs ContentChild</a></li>
+            <li><a href="#queries-lifecycle"><i class="fas fa-hourglass-half"></i> Consultas y Ciclo de Vida</a></li>
+            <li><a href="#render-functions"><i class="fas fa-paint-roller"></i> Funciones de Renderizado</a></li>
+            <li><a href="#signal-effects-deep"><i class="fas fa-layer-group"></i> Signal Effects Avanzados</a></li>
+            <li><a href="#signal-cleanup"><i class="fas fa-broom"></i> Limpieza de Signal Effects</a></li>
+            <li><a href="#typescript-models"><i class="fas fa-code-branch"></i> TypeScript y Modelos</a></li>
+            <li><a href="#input-signals"><i class="fas fa-arrow-right"></i> Inputs y Signals</a></li>
+            <li><a href="#signal-updates"><i class="fas fa-sync-alt"></i> Actualización de Signals</a></li>
+            <li><a href="#state-communication"><i class="fas fa-network-wired"></i> Gestión de Estado</a></li>
+            <li><a href="#inputs-outputs"><i class="fas fa-exchange-alt"></i> Configuración de I/O</a></li>
+            <li><a href="#two-way-custom"><i class="fas fa-sync"></i> Vinculación Bidireccional Personalizada</a></li>
+            <li><a href="#two-way-easy"><i class="fas fa-magic"></i> Vinculación Bidireccional Simplificada</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- 1 -->
+        <section id="host-interactions">
+            <h2><i class="fas animate-icon fa-code"></i> Interactuar con Elementos Host</h2>
+            <p>
+                Qué trata: En este apartado explicamos cómo los decoradores <code>@HostListener</code> y <code>@HostBinding</code>
+                permiten que un componente interactúe directamente con su elemento host (el elemento DOM donde se monta el componente).
+                Esto es útil para responder a eventos nativos (hover, focus, clicks) y para sincronizar propiedades del host (clases, estilos, atributos).
+            </p>
+            <p>
+                Explicación del código: El ejemplo enlaza la propiedad <code>backgroundColor</code> del elemento host con
+                <code>@HostBinding('style.backgroundColor')</code>. Cuando se detecta <code>mouseenter</code> y
+                <code>mouseleave</code> con <code>@HostListener</code>, la propiedad se actualiza y el navegador aplica
+                el estilo directamente al elemento que contiene el componente.
+            </p>
+
+            <div class="code-block">
+                <pre><code class="language-typescript">
+@Component({
+    selector: 'app-host-example',
+    template: `&lt;div&gt;Hover sobre mí!&lt;/div&gt;`
+})
+export class HostExampleComponent {
+    @HostBinding('style.backgroundColor') backgroundColor = 'white';
+
+    @HostListener('mouseenter')
+    onMouseEnter() {
+        this.backgroundColor = '#e0e0e0';
+    }
+
+    @HostListener('mouseleave')
+    onMouseLeave() {
+        this.backgroundColor = 'white';
+    }
+}
+</code></pre>
+            </div>
+
+            <div class="note">
+                <strong>Nota:</strong> @HostBinding enlaza propiedades del elemento host, mientras que @HostListener
+                escucha eventos. Preferir @HostBinding cuando se trata de estilos o atributos para mantener la lógica declarativa.
+            </div>
+        </section>
+
+        <!-- 2 -->
+        <section id="element-access">
+            <h2><i class="fas animate-icon fa-sitemap"></i> Acceso Programático a Elementos</h2>
+            <p>
+                Qué trata: Aquí vemos cómo acceder al DOM desde un componente de forma segura usando <code>ElementRef</code>
+                y <code>Renderer2</code>. Angular desalienta manipular el DOM directamente por seguridad y compatibilidad (SSR,
+                WebWorkers), por eso <code>Renderer2</code> abstrae las operaciones.
+            </p>
+            <p>
+                Explicación del código: En el ejemplo inyectamos <code>ElementRef</code> y <code>Renderer2</code> en el constructor
+                y usamos <code>renderer.setStyle</code> para añadir un borde. Esto evita tocar <code>nativeElement</code>
+                directamente salvo para lecturas puntuales; para cambios, usar <code>Renderer2</code> es más robusto.
+            </p>
+
+            <div class="code-block">
+                <pre><code class="language-typescript">
+@Component({
+    selector: 'app-element-access',
+    template: `&lt;div&gt;Ejemplo de acceso al elemento host&lt;/div&gt;`
+})
+export class ElementAccessComponent {
+    constructor(
+        private elementRef: ElementRef,
+        private renderer: Renderer2
+    ) {
+        // Acceso seguro al DOM usando Renderer2
+        this.renderer.setStyle(
+            this.elementRef.nativeElement,
+            'border',
+            '2px solid blue'
+        );
+    }
+}
+</code></pre>
+            </div>
+        </section>
+
+        <!-- 3 -->
+        <section id="css-classes">
+            <h2><i class="fas animate-icon fa-paint-brush"></i> Enlace Dinámico de Clases CSS</h2>
+            <p>
+                Qué trata: Esta sección muestra maneras de aplicar clases CSS de forma dinámica en plantillas Angular:
+                enlace de clases individuales, <code>[ngClass]</code> con objetos y uso de signals para computar clases.
+            </p>
+            <p>
+                Explicación del código: El fragmento muestra tres enfoques. <code>[class.active]</code> es directo y sencillo
+                para una sola clase; <code>[ngClass]</code> permite múltiples condiciones; y pasar un resultado computado
+                (o signal) a <code>ngClass</code> centraliza la lógica para reaprovecharla y testearla mejor.
+            </p>
+
+            <div class="example">
+                <p>Ejemplo de diferentes formas de enlazar clases CSS:</p>
+                <div class="code-block">
+                    <pre><code class="language-typescript">
+<!-- Enlace de clase simple -->
+&lt;div [class.active]="isActive"&gt;
+    Clase única
+&lt;/div&gt;
+
+<!-- Enlace de múltiples clases -->
+&lt;div [ngClass]="{
+    'active': isActive,
+    'highlighted': isHighlighted,
+    'error': hasError
+}"&gt;
+    Múltiples clases
+&lt;/div&gt;
+
+<!-- Usando signals para clases dinámicas -->
+&lt;div [ngClass]="classesSignal()"&gt;
+    Clases con signals
+&lt;/div&gt;
+</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4 -->
+        <section id="inline-styles">
+            <h2><i class="fas animate-icon fa-palette"></i> Estilos en Línea Dinámicos</h2>
+            <p>
+                Qué trata: Veremos cómo aplicar estilos en línea dinámicos desde la plantilla. Esto es útil cuando los estilos
+                dependen de valores calculados en el componente (p. ej. color según estado, tamaño según preferencia).
+            </p>
+            <p>
+                Explicación del código: <code>[style.prop]</code> enlaza un estilo concreto, <code>[style.x.px]</code> aplica
+                unidades, y <code>[ngStyle]</code> permite pasar un objeto con muchos estilos. Para valores que provienen de
+                computations o signals, convertirlos en funciones/props claras mejora la mantenibilidad.
+            </p>
+
+            <div class="code-block">
+                <pre><code class="language-typescript">
+&lt;div [style.backgroundColor]="getColor()"
+     [style.fontSize.px]="getFontSize()"
+     [ngStyle]="{
+         'color': textColor(),
+         'padding.px': padding(),
+         'border': getBorder()
+     }"&gt;
+    Ejemplo de estilos dinámicos
+&lt;/div&gt;
+</code></pre>
+            </div>
+        </section>
+
+        <!-- 5 -->
+        <section id="state-management">
+            <h2><i class="fas animate-icon fa-database"></i> Manipulación de Estado con Signals</h2>
+            <p>
+                Qué trata: Introducción práctica al uso de <i>Signals</i> para gestionar estado local reactivo en Angular 19/20.
+                Los signals reemplazan patrones basados en observables para casos simples y son más fáciles de razonar.
+            </p>
+            <p>
+                Explicación del código: El ejemplo muestra un contador simple usando <code>signal(0)</code> y el método
+                <code>update</code>. Usar <code>computed</code> y <code>effect</code> permite derivar valores y reaccionar
+                a cambios sin suscripciones manuales.
+            </p>
+
+            <div class="code-block">
+                <pre><code class="language-typescript">
+@Component({
+    selector: 'app-state-example',
+    template: `
+        &lt;div&gt;
+            Contador: {{ count() }}
+            &lt;button (click)="increment()"&gt;Incrementar&lt;/button&gt;
+        &lt;/div&gt;
+    `
+})
+export class StateExampleComponent {
+    count = signal(0);
+
+    increment() {
+        this.count.update(value => value + 1);
+    }
+}
+</code></pre>
+            </div>
+        </section>
+
+        <!-- 6 -->
+        <section id="lifecycle">
+            <h2><i class="fas animate-icon fa-circle-notch"></i> Ciclo de Vida de Componentes</h2>
+            <p>
+                Qué trata: Resumen de los hooks de ciclo de vida más usados como <code>ngOnInit</code>,
+                <code>ngAfterViewInit</code> y <code>ngOnDestroy</code>. Entender el orden es clave para inicializar
+                recursos y liberarlos correctamente.
+            </p>
+            <p>
+                Explicación del código: El componente implementa varias interfaces del ciclo de vida y registra
+                mensajes en cada hook para ilustrar el orden de ejecución. Útil para depuración y para saber dónde
+                realizar lecturas de ViewChild o iniciar subscripciones.
+            </p>
+
+            <div class="example">
+                <p>Implementación de interfaces del ciclo de vida:</p>
+                <div class="code-block">
+                    <pre><code class="language-typescript">
+@Component({
+    selector: 'app-lifecycle',
+    template: `&lt;div&gt;{{ data }}&lt;/div&gt;`
+})
+export class LifecycleComponent implements OnInit, OnDestroy, AfterViewInit {
+    constructor() {
+        console.log('1. Constructor');
+    }
+
+    ngOnInit() {
+        console.log('2. ngOnInit');
+    }
+
+    ngAfterViewInit() {
+        console.log('3. ngAfterViewInit');
+    }
+
+    ngOnDestroy() {
+        console.log('4. ngOnDestroy');
+    }
+}
+</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7 -->
+        <section id="view-content">
+            <h2><i class="fas animate-icon fa-eye"></i> Uso de ViewChild y ContentChild</h2>
+            <p>
+                Qué trata: Explica cómo acceder a elementos y componentes dentro de la propia plantilla (<code>ViewChild</code>)
+                y a contenido proyectado desde el padre (<code>ContentChild</code>). Cada consulta tiene su hook asociado
+                donde es seguro usar el resultado.
+            </p>
+            <p>
+                Explicación del código: En el ejemplo se usa <code>@ViewChild('content')</code> y se lee su
+                <code>nativeElement.textContent</code> en <code>ngAfterViewInit</code>. Esto garantiza que la vista
+                ya está inicializada y evita errores por referencias no disponibles.
+            </p>
+
+            <div class="code-block">
+                <pre><code class="language-typescript">
+@Component({
+    selector: 'app-view-child-example',
+    template: `
+        &lt;div #content&gt;Contenido del componente&lt;/div&gt;
+    `
+})
+export class ViewChildExampleComponent {
+    @ViewChild('content') contentElement!: ElementRef;
+
+    ngAfterViewInit() {
+        console.log(this.contentElement.nativeElement.textContent);
+    }
+}
+</code></pre>
+            </div>
+        </section>
+
+        <!-- 8 -->
+        <section id="signal-effects">
+            <h2><i class="fas animate-icon fa-signal"></i> Signal Effects y Gestión de Estado</h2>
+            <p>
+                Qué trata: Introducción a <code>effect</code> para reaccionar a cambios de signals. Los effects son
+                similares a los observers pero manejan automáticamente la reactividad y limpieza cuando sea necesario.
+            </p>
+            <p>
+                Explicación del código: El constructor crea un effect que registra el valor actual cada vez que
+                cambia la signal <code>value</code>. Esto demuestra cómo conectar lógica secundaria (logging, llamadas
+                a APIs, side-effects) a cambios reactivos sin suscripciones explícitas.
+            </p>
+
+            <div class="code-block">
+                <pre><code class="language-typescript">
+@Component({
+    selector: 'app-signal-effects',
+    template: `
+        &lt;div&gt;
+            Valor: {{ value() }}
+            &lt;button (click)="updateValue()"&gt;Actualizar&lt;/button&gt;
+        &lt;/div&gt;
+    `
+})
+export class SignalEffectsComponent {
+    value = signal(0);
+
+    constructor() {
+        // Crear un effect
+        effect(() => {
+            console.log(`Valor actualizado: ${this.value()}`);
+        });
+    }
+
+    updateValue() {
+        this.value.update(v => v + 1);
+    }
+}
+</code></pre>
+            </div>
+        </section>
+
+        <!-- 9 -->
+        <section id="component-communication">
+            <h2><i class="fas animate-icon fa-exchange-alt"></i> Comunicación entre Componentes</h2>
+            <p>
+                Qué trata: Repasa patrones padre-hijo con <code>@Input</code> y <code>@Output</code>, la forma estándar
+                de pasar datos y eventos entre componentes en Angular.
+            </p>
+            <p>
+                Explicación del código: El componente hijo define un <code>@Input()</code> para recibir datos y un
+                <code>@Output()</code> (EventEmitter) para emitir eventos al padre. El padre enlaza ambas propiedades
+                en la plantilla para recibir y enviar información.
+            </p>
+
+            <div class="example">
+                <p>Ejemplo de comunicación padre-hijo usando @Input() y @Output():</p>
+                <div class="code-block">
+                    <pre><code class="language-typescript">
+// Componente hijo
+@Component({
+    selector: 'app-child',
+    template: `
+        &lt;div&gt;
+            &lt;p&gt;{{ inputData }}&lt;/p&gt;
+            &lt;button (click)="sendData()"&gt;Enviar al padre&lt;/button&gt;
+        &lt;/div&gt;
+    `
+})
+export class ChildComponent {
+    @Input() inputData: string = '';
+    @Output() dataEvent = new EventEmitter&lt;string&gt;();
+
+    sendData() {
+        this.dataEvent.emit('Datos del hijo');
+    }
+}
+
+// Componente padre
+@Component({
+    selector: 'app-parent',
+    template: `
+        &lt;app-child
+            [inputData]="parentData"
+            (dataEvent)="handleChildData($event)"&gt;
+        &lt;/app-child&gt;
+    `
+})
+export class ParentComponent {
+    parentData = 'Datos del padre';
+
+    handleChildData(data: string) {
+        console.log(data);
+    }
+}
+</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- 10 -->
+        <section id="two-way-binding">
+            <h2><i class="fas animate-icon fa-sync"></i> Vinculación Bidireccional</h2>
+            <p>
+                Qué trata: Explicación de la vinculación bidireccional clásica con <code>ngModel</code> y cómo sincronizar
+                valores entre la plantilla y el componente sin escribir manejadores manuales de eventos.
+            </p>
+            <p>
+                Explicación del código: El ejemplo muestra un <code>input</code> con <code>[(ngModel)]</code>. Esto crea
+                automáticamente una actualización hacia el componente y hacia la vista. Recuerda importar
+                <code>FormsModule</code> para habilitar esta sintaxis.
+            </p>
+
+            <div class="code-block">
+                <pre><code class="language-typescript">
+@Component({
+    selector: 'app-two-way',
+    template: `
+        &lt;input [(ngModel)]="value"&gt;
+        &lt;p&gt;Valor: {{ value }}&lt;/p&gt;
+    `
+})
+export class TwoWayBindingComponent {
+    value = '';
+}</code></pre>
+            </div>
+            <div class="note">
+                <strong>Nota:</strong> Para usar ngModel, asegúrate de importar FormsModule en tu módulo.
+            </div>
+        </section>
+
+        <!-- 11 -->
+        <section id="template-variables">
+            <h2><i class="fas animate-icon fa-hashtag"></i> Variables de Plantilla en Angular</h2>
+            <p>
+                Qué trata: Describe cómo declarar variables locales en la plantilla (p. ej. <code>#userInput</code>) para
+                referenciar elementos, directivas o formularios sin necesidad de enlazarlos al componente con ViewChild.
+            </p>
+            <p>
+                Explicación del código: En el ejemplo se usan variables para leer el valor de un <code>input</code>
+                y para obtener el estado del formulario <code>ngForm</code>. Esto es práctico para acciones puntuales
+                y validaciones sencillas desde la plantilla.
+            </p>
+
+            <div class="code-block">
+                <pre><code class="language-typescript">
+@Component({
+    selector: 'app-template-vars',
+    template: `
+        <!-- Variable de plantilla básica -->
+        &lt;input #userInput type="text"&gt;
+        &lt;button (click)="showValue(userInput.value)"&gt;
+            Mostrar Valor
+        &lt;/button&gt;
+
+        <!-- Variable con directiva -->
+        &lt;form #loginForm="ngForm" (ngSubmit)="onSubmit(loginForm)"&gt;
+            &lt;input name="username" ngModel required&gt;
+            &lt;button type="submit"&gt;Enviar&lt;/button&gt;
+        &lt;/form&gt;
+    `
+})
+export class TemplateVarsComponent {
+    showValue(value: string) {
+        console.log('Valor ingresado:', value);
+    }
+
+    onSubmit(form: NgForm) {
+        if (form.valid) {
+            console.log('Formulario enviado:', form.value);
+        }
+    }
+}
+</code></pre>
+            </div>
+
+            <div class="tip">
+                <strong>Consejo:</strong> Las variables de plantilla son excelentes para acceder a valores de forma directa sin necesidad de usar ViewChild.
+            </div>
+        </section>
+
+        <!-- 12 -->
+        <section id="cleanup">
+            <h2><i class="fas animate-icon fa-broom"></i> Limpieza de Componentes</h2>
+            <p>
+                Qué trata: Estrategias para liberar recursos (subscriptions, timers, observables, etc.) cuando un componente
+                se destruye. Esto evita fugas de memoria y comportamientos inesperados.
+            </p>
+            <p>
+                Explicación del código: El ejemplo muestra dos aproximaciones: cancelar manualmente una suscripción en
+                <code>ngOnDestroy</code> y usar <code>DestroyRef</code> con <code>takeUntilDestroyed</code> para una limpieza
+                más moderna y declarativa.
+            </p>
+
+            <h3>Usando ngOnDestroy</h3>
+            <div class="code-block">
+                <pre><code class="language-typescript">
+@Component({
+    selector: 'app-cleanup',
+    template: `&lt;div&gt;{{ data$ | async }}&lt;/div&gt;`
+})
+export class CleanupComponent implements OnDestroy {
+    private subscription: Subscription;
+    data$ = new BehaviorSubject&lt;string&gt;('');
+
+    constructor() {
+        this.subscription = interval(1000).subscribe(
+            val => this.data$.next(`Dato ${val}`)
+        );
+    }
+
+    ngOnDestroy() {
+        // Limpieza de recursos
+        this.subscription.unsubscribe();
+        this.data$.complete();
+    }
+}
+</code></pre>
+            </div>
+
+            <h3>Usando DestroyRef</h3>
+            <div class="code-block">
+                <pre><code class="language-typescript">
+@Component({
+    selector: 'app-modern-cleanup',
+    template: `&lt;div&gt;{{ counter }}&lt;/div&gt;`
+})
+export class ModernCleanupComponent {
+    counter = 0;
+
+    constructor(private destroyRef: DestroyRef) {
+        // Se limpia automáticamente cuando el componente se destruye
+        interval(1000).pipe(
+            takeUntilDestroyed(destroyRef)
+        ).subscribe(
+            val => this.counter = val
+        );
+    }
+}
+</code></pre>
+            </div>
+        </section>
+
+        <!-- 13 -->
+        <section id="signals-advanced">
+            <h2><i class="fas animate-icon fa-atom"></i> Signals Avanzados</h2>
+            <p>
+                Qué trata: Profundiza en <code>computed</code>, efectos con limpieza y composición de signals para construir
+                estados derivados y lógicos más complejos.
+            </p>
+            <p>
+                Explicación del código: Se muestra cómo derivar un estado <code>status</code> con <code>computed</code>
+                y cómo crear un effect que devuelve una función de limpieza. Esto ilustra patrones para evitar efectos
+                colgantes y para reaccionar a combinaciones de signals.
+            </p>
+
+            <h3>Signal Effects y Limpieza</h3>
+            <div class="code-block">
+                <pre><code class="language-typescript">
+@Component({
+    selector: 'app-signals-advanced',
+    template: `
+        &lt;div&gt;
+            Contador: {{ counter() }}
+            &lt;button (click)="increment()"&gt;+&lt;/button&gt;
+            &lt;div&gt;Estado: {{ status() }}&lt;/div&gt;
+        &lt;/div&gt;
+    `
+})
+export class SignalsAdvancedComponent {
+    counter = signal(0);
+    status = computed(() =>
+        this.counter() > 5 ? 'Alto' : 'Bajo'
+    );
+
+    constructor() {
+        // Effect con limpieza
+        effect(() => {
+            const count = this.counter();
+            const cleanup = this.logValue(count);
+
+            return cleanup; // Función de limpieza
+        });
+    }
+
+    private logValue(value: number) {
+        console.log(`Valor actual: ${value}`);
+        return () => console.log(`Limpiando valor: ${value}`);
+    }
+
+    increment() {
+        this.counter.update(n => n + 1);
+    }
+}
+</code></pre>
+            </div>
+
+            <h3>Signals con TypeScript</h3>
+            <div class="code-block">
+                <pre><code class="language-typescript">
+interface User {
+    id: number;
+    name: string;
+    email: string;
+}
+
+@Component({
+    selector: 'app-typed-signals',
+    template: `
+        &lt;div *ngIf="user()"&gt;
+            {{ user().name }}
+            &lt;button (click)="updateEmail()"&gt;
+                Actualizar Email
+            &lt;/button&gt;
+        &lt;/div&gt;
+    `
+})
+export class TypedSignalsComponent {
+    user = signal&lt;User | null&gt;(null);
+
+    loadUser() {
+        this.user.set({
+            id: 1,
+            name: 'Ana',
+            email: 'ana@example.com'
+        });
+    }
+
+    updateEmail() {
+        this.user.update(user => user ? {
+            ...user,
+            email: 'nuevo@example.com'
+        } : null);
+    }
+}
+</code></pre>
+            </div>
+
+            <div class="note">
+                <strong>Nota:</strong> Los Signals son inmutables por defecto. Siempre crea nuevas referencias al actualizar valores complejos.
+            </div>
+        </section>
+
+        <!-- 14 -->
+        <section id="form-handling">
+            <h2><i class="fas animate-icon fa-wpforms"></i> Manejo de Envíos de Formularios con Variables de Plantilla</h2>
+            <p>
+                Qué trata: Muestra cómo usar variables de plantilla y <code>ngForm</code> para manejar envíos, validaciones
+                y estados sin necesidad de FormBuilder (para formularios simples).
+            </p>
+            <p>
+                Explicación del código: La variable local del formulario (<code>#registroForm="ngForm"</code>) expone
+                propiedades como <code>invalid</code> y <code>touched</code>. También se ilustra cómo marcar el botón de
+                envío como deshabilitado si el formulario no es válido.
+            </p>
+
+            <div class="code-block">
+                <pre><code class="language-typescript">
+@Component({
+    selector: 'app-form-handling',
+    template: `
+        &lt;form #registroForm="ngForm" (ngSubmit)="onSubmit(registroForm)"&gt;
+            &lt;div class="form-group"&gt;
+                &lt;input #nombreInput="ngModel"
+                       name="nombre"
+                       [(ngModel)]="usuario.nombre"
+                       required
+                       minlength="3"&gt;
+
+                &lt;div *ngIf="nombreInput.invalid && nombreInput.touched"&gt;
+                    &lt;span *ngIf="nombreInput.errors?.['required']"&gt;
+                        El nombre es requerido
+                    &lt;/span&gt;
+                    &lt;span *ngIf="nombreInput.errors?.['minlength']"&gt;
+                        El nombre debe tener al menos 3 caracteres
+                    &lt;/span&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+
+            &lt;button type="submit" [disabled]="registroForm.invalid"&gt;
+                Registrar
+            &lt;/button&gt;
+        &lt;/form&gt;
+    `
+})
+export class FormHandlingComponent {
+    usuario = { nombre: '' };
+
+    onSubmit(form: NgForm) {
+        if (form.valid) {
+            console.log('Formulario válido:', form.value);
+            // Procesar el formulario
+        }
+    }
+}
+</code></pre>
+            </div>
+
+            <div class="tip">
+                <strong>Consejo:</strong> Las variables de plantilla con ngForm proporcionan acceso a la validación y estado del formulario.
+            </div>
+        </section>
+
+        <!-- 15 -->
+        <section id="template-values">
+            <h2><i class="fas animate-icon fa-keyboard"></i> Extracción de Valores de Entrada</h2>
+            <p>
+                Qué trata: Diferentes formas de obtener valores de inputs y selects: variables de plantilla, ViewChild y
+                ngModel. Elegir la técnica depende de si necesitas acceso puntual (plantilla) o manipulación desde TS
+                (ViewChild/Bindings).
+            </p>
+            <p>
+                Explicación del código: El ejemplo combina las tres técnicas: lectura directa del valor en un evento
+                <code>input</code>, acceso al <code>textarea</code> mediante <code>ViewChild</code> en
+                <code>ngAfterViewInit</code>, y enlace bidireccional con <code>ngModel</code> para selects.
+            </p>
+
+            <div class="code-block">
+                <pre><code class="language-typescript">
+@Component({
+    selector: 'app-input-values',
+    template: `
+        &lt;div class="input-group"&gt;
+            &lt;!-- Acceso directo al valor --&gt;
+            &lt;input #textInput type="text"
+                   (input)="onInput(textInput.value)"&gt;
+
+            &lt;!-- Acceso mediante ViewChild --&gt;
+            &lt;textarea #messageArea
+                      (blur)="onBlur()"&gt;&lt;/textarea&gt;
+
+            &lt;!-- Combinación con ngModel --&gt;
+            &lt;select #selectElement="ngModel"
+                    [(ngModel)]="selectedOption"
+                    (change)="onChange(selectElement.value)"&gt;
+                &lt;option value="1"&gt;Opción 1&lt;/option&gt;
+                &lt;option value="2"&gt;Opción 2&lt;/option&gt;
+            &lt;/select&gt;
+        &lt;/div&gt;
+    `
+})
+export class InputValuesComponent implements AfterViewInit {
+    @ViewChild('messageArea') messageArea!: ElementRef;
+    selectedOption: string = '';
+
+    onInput(value: string) {
+        console.log('Valor de entrada:', value);
+    }
+
+    onBlur() {
+        console.log('Texto del área:', this.messageArea.nativeElement.value);
+    }
+
+    onChange(value: string) {
+        console.log('Opción seleccionada:', value);
+    }
+
+    ngAfterViewInit() {
+        // Acceso seguro después de la inicialización de la vista
+        console.log('Área de mensaje inicializada');
+    }
+}
+</code></pre>
+            </div>
+
+            <div class="note">
+                <strong>Nota:</strong> La combinación de variables de plantilla con ViewChild ofrece mayor flexibilidad en el manejo de valores.
+            </div>
+        </section>
+
+        <!-- 16 -->
+        <section id="template-components">
+            <h2><i class="fas animate-icon fa-puzzle-piece"></i> Variables de Plantilla y Componentes</h2>
+            <p>
+                Qué trata: Cómo referenciar componentes completos desde la plantilla mediante una variable local
+                (p. ej. <code>#childComp</code>) para llamar métodos públicos o leer propiedades.
+            </p>
+            <p>
+                Explicación del código: El padre declara <code>#childComp</code> en la etiqueta del hijo y en la plantilla
+                invoca <code>childComp.reset()</code>. Esto es práctico para control directo del componente hijo sin pasar
+                inputs/outputs cuando la relación es estrecha.
+            </p>
+
+            <div class="code-block">
+                <pre><code class="language-typescript">
+// Componente hijo
+@Component({
+    selector: 'app-child',
+    template: `
+        &lt;div&gt;Estado actual: {{ state }}&lt;/div&gt;
+        &lt;button (click)="toggle()"&gt;Cambiar&lt;/button&gt;
+    `
+})
+export class ChildComponent {
+    state: boolean = false;
+
+    toggle() {
+        this.state = !this.state;
+    }
+
+    reset() {
+        this.state = false;
+    }
+}
+
+// Componente padre
+@Component({
+    selector: 'app-parent',
+    template: `
+        &lt;app-child #childComp&gt;&lt;/app-child&gt;
+
+        &lt;button (click)="childComp.reset()"&gt;
+            Resetear Hijo
+        &lt;/button&gt;
+
+        &lt;div&gt;Estado del hijo: {{ childComp.state }}&lt;/div&gt;
+    `
+})
+export class ParentComponent {
+    @ViewChild('childComp') childComponent!: ChildComponent;
+
+    ngAfterViewInit() {
+        console.log('Estado inicial:', this.childComponent.state);
+    }
+}
+</code></pre>
+            </div>
+
+            <div class="warning">
+                <strong>Advertencia:</strong> El acceso a componentes hijo debe realizarse después de AfterViewInit para garantizar su disponibilidad.
+            </div>
+        </section>
+
+        <!-- 17 -->
+        <section id="viewchild-usage">
+            <h2><i class="fas animate-icon fa-search"></i> ViewChild Avanzado</h2>
+            <p>
+                Qué trata: Patrones avanzados con <code>ViewChild</code>: lectura de canvas, creación dinámica de componentes
+                y lectura de directivas. También se explica la opción <code>{ static: true }</code> vs <code>false</code>.
+            </p>
+            <p>
+                Explicación del código: Se muestran usos prácticos: manipular un canvas 2D tras la inicialización de la vista,
+                instanciar componentes dinámicos con <code>ViewContainerRef</code> y leer directivas aplicadas en la vista.
+            </p>
+
+            <div class="code-block">
+                <pre><code class="language-typescript">
+@Component({
+    selector: 'app-viewchild-advanced',
+    template: `
+        &lt;div #container class="container"&gt;
+            &lt;app-custom #customComp
+                        [data]="data"
+                        (update)="onUpdate($event)"&gt;
+            &lt;/app-custom&gt;
+
+            &lt;canvas #canvas&gt;&lt;/canvas&gt;
+        &lt;/div&gt;
+    `
+})
+export class ViewChildAdvancedComponent implements AfterViewInit {
+    @ViewChild('container') container!: ElementRef;
+    @ViewChild('customComp') customComponent!: CustomComponent;
+    @ViewChild('canvas') canvas!: ElementRef&lt;HTMLCanvasElement&gt;;
+
+    // ViewChild con selector de directiva
+    @ViewChild(CustomDirective) customDirective!: CustomDirective;
+
+    // ViewChild con opciones
+    @ViewChild('dynamicContent', { static: false, read: ViewContainerRef })
+    dynamicContainer!: ViewContainerRef;
+
+    data = 'Datos iniciales';
+
+    ngAfterViewInit() {
+        // Acceso al DOM nativo
+        const containerElement = this.container.nativeElement;
+
+        // Acceso al componente
+        this.customComponent.initialize();
+
+        // Manipulación del canvas
+        const ctx = this.canvas.nativeElement.getContext('2d');
+
+        // Manipulación del contenedor dinámico
+        this.dynamicContainer.createComponent(DynamicComponent);
+    }
+
+    onUpdate(event: any) {
+        console.log('Actualización recibida:', event);
+    }
+}
+</code></pre>
+            </div>
+
+            <div class="tip">
+                <strong>Consejo:</strong> Usa la opción { static: true } cuando necesites acceder al elemento en ngOnInit.
+            </div>
+        </section>
+
+        <!-- 18 -->
+        <section id="signal-viewchild">
+            <h2><i class="fas animate-icon fa-link"></i> Usando Signal con ViewChild</h2>
+            <p>
+                Qué trata: Combinar las capacidades reactivas de signals con consultas de vista para obtener una lógica
+                declarativa que reaccione a cambios estructurales de la vista.
+            </p>
+            <p>
+                Explicación del código: Se define un signal <code>content</code> y otro <code>dynamicValue</code> que se usa
+                para actualizar un componente dinámico referenciado por ViewChild. Un <code>effect</code> observa y aplica
+                cambios automáticamente.
+            </p>
+
+            <div class="code-block">
+                <pre><code class="language-typescript">
+@Component({
+    selector: 'app-signal-viewchild',
+    template: `
+        &lt;div #contentRef&gt;
+            {{ content() }}
+        &lt;/div&gt;
+
+        &lt;app-dynamic #dynamicComp
+                     [value]="dynamicValue()"&gt;
+        &lt;/app-dynamic&gt;
+    `
+})
+export class SignalViewChildComponent implements AfterViewInit {
+    @ViewChild('contentRef') contentRef!: ElementRef;
+    @ViewChild('dynamicComp') dynamicComp!: DynamicComponent;
+
+    // Signals
+    content = signal('Contenido inicial');
+    dynamicValue = signal(0);
+
+    // Signal computado basado en ViewChild
+    elementWidth = computed(() => {
+        if (!this.contentRef) return 0;
+        return this.contentRef.nativeElement.offsetWidth;
+    });
+
+    constructor() {
+        // Effect que observa cambios en el componente dinámico
+        effect(() => {
+            if (this.dynamicComp) {
+                console.log('Valor dinámico:', this.dynamicValue());
+                this.dynamicComp.update(this.dynamicValue());
+            }
+        });
+    }
+
+    ngAfterViewInit() {
+        // Actualizar signals después de la vista
+        setTimeout(() => {
+            this.content.set('Nuevo contenido');
+            this.dynamicValue.update(v => v + 1);
+        });
+    }
+}
+</code></pre>
+            </div>
+
+            <div class="note">
+                <strong>Nota:</strong> Los Signals se actualizan automáticamente cuando cambian las referencias de ViewChild.
+            </div>
+        </section>
+
+        <!-- 19 -->
+        <section id="viewchild-contentchild">
+            <h2><i class="fas animate-icon fa-project-diagram"></i> ViewChild vs ContentChild</h2>
+            <p>
+                Qué trata: Diferencia entre consultar elementos de la propia vista (<code>ViewChild</code>) y elementos
+                proyectados desde el exterior (<code>ContentChild</code>), y en qué hook es seguro usar cada uno.
+            </p>
+            <p>
+                Explicación del código: Se muestra un contenedor que usa ambas estrategias y el uso de
+                <code>AfterViewInit</code> y <code>AfterContentInit</code> para leer las consultas cuando están listas.
+            </p>
+
+            <div class="code-block">
+                <pre><code class="language-typescript">
+// Componente contenedor
+@Component({
+    selector: 'app-container',
+    template: `
+        &lt;!-- ViewChild: Elemento en la plantilla --&gt;
+        &lt;header #header&gt;
+            {{ title }}
+        &lt;/header&gt;
+
+        &lt;!-- ContentChild: Contenido proyectado --&gt;
+        &lt;ng-content select="[content]"&gt;&lt;/ng-content&gt;
+
+        &lt;footer #footer&gt;
+            &lt;ng-content select="[footer]"&gt;&lt;/ng-content&gt;
+        &lt;/footer&gt;
+    `
+})
+export class ContainerComponent implements AfterViewInit, AfterContentInit {
+    @ViewChild('header') header!: ElementRef;
+    @ViewChild('footer') footer!: ElementRef;
+
+    @ContentChild('contentRef') contentRef!: ElementRef;
+    @ContentChild(CustomContentComponent)
+    customContent!: CustomContentComponent;
+
+    title = 'Contenedor';
+
+    ngAfterViewInit() {
+        console.log('Vista inicializada');
+        console.log('Header:', this.header.nativeElement);
+        console.log('Footer:', this.footer.nativeElement);
+    }
+
+    ngAfterContentInit() {
+        console.log('Contenido inicializado');
+        console.log('Contenido:', this.contentRef?.nativeElement);
+        console.log('Componente:', this.customContent);
+    }
+}
+
+// Uso del componente
+@Component({
+    selector: 'app-usage',
+    template: `
+        &lt;app-container&gt;
+            &lt;div #contentRef content&gt;
+                Contenido proyectado
+            &lt;/div&gt;
+
+            &lt;app-custom-content content&gt;
+            &lt;/app-custom-content&gt;
+
+            &lt;div footer&gt;
+                Pie de página
+            &lt;/div&gt;
+        &lt;/app-container&gt;
+    `
+})
+export class UsageComponent {}
+</code></pre>
+            </div>
+
+            <div class="tip">
+                <strong>Diferencias clave:</strong>
+                <ul>
+                    <li>ViewChild: Accede a elementos/componentes en la plantilla del componente</li>
+                    <li>ContentChild: Accede a elementos/componentes proyectados desde fuera</li>
+                    <li>Ciclo de vida: ViewChild → AfterViewInit, ContentChild → AfterContentInit</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 20 -->
+        <section id="queries-lifecycle">
+            <h2><i class="fas animate-icon fa-hourglass-half"></i> Consultas y Ciclo de Vida</h2>
+            <p>
+                Qué trata: Cómo las consultas (ViewChild/ContentChild) se comportan a lo largo del ciclo de vida y consejos
+                para evitar errores comunes como <code>ExpressionChangedAfterItHasBeenCheckedError</code> al modificar el estado
+                demasiado pronto.
+            </p>
+            <p>
+                Explicación del código: En el ejemplo se logran resultados de las consultas en distintos hooks y se usa
+                <code>setTimeout</code> para demorar cambios que de otra forma provocarían errores de verificación de Angular.
+            </p>
+
+            <div class="code-block">
+                <pre><code class="language-typescript">
+@Component({
+    selector: 'app-lifecycle-queries',
+    template: `
+        &lt;div #viewElement&gt;Elemento de vista&lt;/div&gt;
+        &lt;ng-content&gt;&lt;/ng-content&gt;
+
+        &lt;div *ngIf="showDynamic"&gt;
+            &lt;div #dynamicElement&gt;Elemento dinámico&lt;/div&gt;
+        &lt;/div&gt;
+    `
+})
+export class LifecycleQueriesComponent implements
+    OnInit,
+    AfterContentInit,
+    AfterContentChecked,
+    AfterViewInit,
+    AfterViewChecked {
+
+    @ViewChild('viewElement') viewElement!: ElementRef;
+    @ViewChild('dynamicElement') dynamicElement?: ElementRef;
+    @ContentChild('contentElement') contentElement!: ElementRef;
+
+    showDynamic = false;
+
+    constructor() {
+        console.log('1. Constructor');
+        this.logQueryResults('constructor');
+    }
+
+    ngOnInit() {
+        console.log('2. OnInit');
+        this.logQueryResults('ngOnInit');
+    }
+
+    ngAfterContentInit() {
+        console.log('3. AfterContentInit');
+        this.logQueryResults('ngAfterContentInit');
+    }
+
+    ngAfterContentChecked() {
+        console.log('4. AfterContentChecked');
+        this.logQueryResults('ngAfterContentChecked');
+    }
+
+    ngAfterViewInit() {
+        console.log('5. AfterViewInit');
+        this.logQueryResults('ngAfterViewInit');
+
+        // Modificación segura después de la vista
+        setTimeout(() => {
+            this.showDynamic = true;
+        });
+    }
+
+    ngAfterViewChecked() {
+        console.log('6. AfterViewChecked');
+        this.logQueryResults('ngAfterViewChecked');
+    }
+
+    private logQueryResults(hook: string) {
+        console.log(`${hook}:`, {
+            viewElement: this.viewElement?.nativeElement?.textContent,
+            dynamicElement: this.dynamicElement?.nativeElement?.textContent,
+            contentElement: this.contentElement?.nativeElement?.textContent
+        });
+    }
+}
+</code></pre>
+            </div>
+
+            <div class="warning">
+                <strong>Importante:</strong>
+                <ul>
+                    <li>Las consultas de contenido están disponibles en ngAfterContentInit</li>
+                    <li>Las consultas de vista están disponibles en ngAfterViewInit</li>
+                    <li>Modifica el estado en setTimeout para evitar el error ExpressionChangedAfterItHasBeenCheckedError</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 21 -->
+        <section id="render-functions">
+            <h2><i class="fas animate-icon fa-paint-roller"></i> Funciones afterRender y afterNextRender</h2>
+            <p>
+                Qué trata: Presenta las funciones de renderizado (post-render hooks) que permiten ejecutar código después de
+                que la vista haya sido renderizada, útil para integrar bibliotecas externas o realizar optimizaciones DOM.
+            </p>
+            <p>
+                Explicación del código: <code>afterRender</code> se ejecuta tras el render actual, y <code>afterNextRender</code>
+                después del siguiente render; se usan para tareas como inicializar librerías que necesitan el DOM estable.
+            </p>
+
+            <div class="code-block">
+                <pre><code class="language-typescript">
+@Component({
+    selector: 'app-render-functions',
+    template: `
+        &lt;div #container&gt;
+            {{ content() }}
+        &lt;/div&gt;
+    `
+})
+export class RenderFunctionsComponent {
+    content = signal('Contenido inicial');
+
+    constructor() {
+        // Se ejecuta después del renderizado actual
+        afterRender(() => {
+            console.log('Vista renderizada');
+            this.performOptimizations();
+        });
+
+        // Se ejecuta después del próximo renderizado
+        afterNextRender(() => {
+            console.log('Próximo renderizado completado');
+            this.initializeThirdPartyLibrary();
+        });
+    }
+
+    private performOptimizations() {
+        // Optimizaciones post-renderizado
+    }
+
+    private initializeThirdPartyLibrary() {
+        // Inicialización segura de bibliotecas externas
+    }
+}
+</code></pre>
+            </div>
+
+            <div class="tip">
+                <strong>Consejo:</strong> Usa afterNextRender para operaciones que necesitan ejecutarse una sola vez después del próximo ciclo de renderizado.
+            </div>
+        </section>
+
+        <!-- 22 -->
+        <section id="signal-effects-deep">
+            <h2><i class="fas animate-icon fa-layer-group"></i> Signal Effects Avanzados</h2>
+            <p>
+                Qué trata: Amplía patrones de effects complejos: efectos dependientes, limpieza con <code>onCleanup</code>
+                y coordinación entre múltiples signals.
+            </p>
+            <p>
+                Explicación del código: En el ejemplo se combinan signals (counter y threshold) y se usan effects para
+                detectar cuando se supera un umbral; además se muestra cómo limpiar un subscription creado dentro de un effect.
+            </p>
+
+            <div class="code-block">
+                <pre><code class="language-typescript">
+@Component({
+    selector: 'app-advanced-effects',
+    template: `
+        &lt;div&gt;
+            Contador: {{ counter() }}
+            Estado: {{ status() }}
+            &lt;button (click)="increment()"&gt;+&lt;/button&gt;
+        &lt;/div&gt;
+    `
+})
+export class AdvancedEffectsComponent {
+    counter = signal(0);
+    threshold = signal(5);
+
+    status = computed(() => {
+        const count = this.counter();
+        const limit = this.threshold();
+        return count > limit ? 'Alto' : 'Bajo';
+    });
+
+    constructor() {
+        // Effect con dependencias anidadas
+        effect(() => {
+            console.log(`Estado actual: ${this.status()}`);
+
+            // El effect se ejecutará cuando cambie counter o threshold
+            if (this.counter() > this.threshold()) {
+                this.handleHighValue();
+            }
+        });
+
+        // Effect con limpieza
+        effect((onCleanup) => {
+            const subscription = interval(1000).subscribe(() => {
+                this.counter.update(n => n + 1);
+            });
+
+            onCleanup(() => {
+                subscription.unsubscribe();
+            });
+        });
+    }
+
+    private handleHighValue() {
+        console.log('Valor excedió el umbral');
+    }
+
+    increment() {
+        this.counter.update(n => n + 1);
+    }
+}
+</code></pre>
+            </div>
+        </section>
+
+        <!-- 23 -->
+        <section id="signal-cleanup">
+            <h2><i class="fas animate-icon fa-broom"></i> Limpieza de Signal Effects</h2>
+            <p>
+                Qué trata: Cómo cancelar fetches, timers y otros recursos desde dentro de effects usando la función
+                de limpieza <code>onCleanup</code> para evitar operaciones huérfanas cuando el efecto se re-ejecuta o se destruye.
+            </p>
+            <p>
+                Explicación del código: El ejemplo muestra la creación de un <code>AbortController</code> dentro de un effect
+                y su cancelación en <code>onCleanup</code>, además de limpiar temporizadores con <code>clearInterval</code>.
+            </p>
+
+            <div class="code-block">
+                <pre><code class="language-typescript">
+@Component({
+    selector: 'app-signal-cleanup',
+    template: `
+        &lt;div&gt;
+            Datos: {{ data() | json }}
+            &lt;button (click)="loadData()"&gt;Cargar&lt;/button&gt;
+        &lt;/div&gt;
+    `
+})
+export class SignalCleanupComponent {
+    data = signal&lt;any&gt;(null);
+    loading = signal(false);
+
+    constructor(private http: HttpClient) {
+        // Effect con gestión de recursos
+        effect((onCleanup) => {
+            const abortController = new AbortController();
+
+            if (this.loading()) {
+                this.fetchData(abortController.signal);
+            }
+
+            onCleanup(() => {
+                abortController.abort();
+                console.log('Solicitud cancelada');
+            });
+        });
+
+        // Effect con temporizador
+        effect((onCleanup) => {
+            const timer = setInterval(() => {
+                console.log('Datos actuales:', this.data());
+            }, 5000);
+
+            onCleanup(() => {
+                clearInterval(timer);
+                console.log('Temporizador limpiado');
+            });
+        });
+    }
+
+    private async fetchData(signal: AbortSignal) {
+        try {
+            const result = await this.http.get('/api/data', { signal })
+                .toPromise();
+            this.data.set(result);
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                console.log('Solicitud abortada');
+            }
+        }
+    }
+
+    loadData() {
+        this.loading.set(true);
+    }
+}
+</code></pre>
+            </div>
+
+            <div class="note">
+                <strong>Nota:</strong> La función onCleanup garantiza la liberación adecuada de recursos cuando el efecto se vuelve a ejecutar o se destruye.
+            </div>
+        </section>
+
+        <!-- 24 -->
+        <section id="typescript-models">
+            <h2><i class="fas animate-icon fa-code-branch"></i> TypeScript y Modelos de Tipos</h2>
+            <p>
+                Qué trata: Buenas prácticas para modelar datos con TypeScript y usar types/interfaces con signals y outputs
+                para obtener un código más seguro y autocompletado en el editor.
+            </p>
+            <p>
+                Explicación del código: Definimos interfaces <code>UserData</code> y <code>UserUpdate</code>, usamos
+                <code>signal&lt;UserData&gt;</code> y emitimos eventos tipados con <code>EventEmitter&lt;UserUpdate&gt;</code>.
+                Esto ayuda a detectar errores en tiempo de compilación.
+            </p>
+
+            <div class="code-block">
+                <pre><code class="language-typescript">
+// Definición de tipos
+interface UserData {
+    id: number;
+    name: string;
+    email: string;
+    preferences: {
+        theme: 'light' | 'dark';
+        notifications: boolean;
+    };
+}
+
+interface UserUpdate {
+    type: 'name' | 'email' | 'preferences';
+    value: any;
+}
+
+@Component({
+    selector: 'app-typescript-models',
+    template: `
+        &lt;div&gt;
+            &lt;h3&gt;{{ user().name }}&lt;/h3&gt;
+            &lt;p&gt;{{ user().email }}&lt;/p&gt;
+
+            &lt;button (click)="updateUser('name', 'Nuevo Nombre')"&gt;
+                Actualizar Nombre
+            &lt;/button&gt;
+
+            &lt;button (click)="updatePreferences({ theme: 'dark' })"&gt;
+                Tema Oscuro
+            &lt;/button&gt;
+        &lt;/div&gt;
+    `
+})
+export class TypescriptModelsComponent {
+    user = signal&lt;UserData&gt;({
+        id: 1,
+        name: 'Usuario',
+        email: 'usuario@ejemplo.com',
+        preferences: {
+            theme: 'light',
+            notifications: true
+        }
+    });
+
+    @Output() userUpdated = new EventEmitter&lt;UserUpdate&gt;();
+
+    updateUser&lt;K extends keyof UserData&gt;(
+        type: K,
+        value: UserData[K]
+    ) {
+        this.user.update(current => ({
+            ...current,
+            [type]: value
+        }));
+
+        this.userUpdated.emit({ type, value });
+    }
+
+    updatePreferences(newPrefs: Partial&lt;UserData['preferences']&gt;) {
+        this.user.update(current => ({
+            ...current,
+            preferences: {
+                ...current.preferences,
+                ...newPrefs
+            }
+        }));
+    }
+}
+</code></pre>
+            </div>
+        </section>
+
+        <!-- 25 -->
+        <section id="input-signals">
+            <h2><i class="fas animate-icon fa-arrow-right"></i> Inputs y Signals</h2>
+            <p>
+                Qué trata: Nueva API para declarar inputs basados en signals, permitiendo transformaciones y valores por defecto
+                directamente en la firma del input.
+            </p>
+            <p>
+                Explicación del código: El ejemplo muestra inputs declarados con la forma <code>input&lt;T&gt;()</code>, uso de
+                transformaciones y cómo observar cambios con <code>effect</code>. Esto mejora tipado y claridad.
+            </p>
+
+            <div class="code-block">
+                <pre><code class="language-typescript">
+@Component({
+    selector: 'app-input-signals',
+    template: `
+        &lt;div&gt;
+            &lt;h3&gt;{{ title() }}&lt;/h3&gt;
+            &lt;p&gt;Contador: {{ counter() }}&lt;/p&gt;
+            &lt;p&gt;Estado: {{ status() }}&lt;/p&gt;
+        &lt;/div&gt;
+    `
+})
+export class InputSignalsComponent {
+    // Input tradicional
+    @Input() title = input&lt;string&gt;();
+
+    // Input con valor por defecto
+    @Input() count = input&lt;number&gt;(0);
+
+    // Input con transformación
+    @Input({ transform: (value: string) => value.toUpperCase() })
+    name = input&lt;string&gt;();
+
+    // Input computado
+    status = computed(() => {
+        return this.count() > 10 ? 'Alto' : 'Bajo';
+    });
+
+    constructor() {
+        // Observar cambios en los inputs
+        effect(() => {
+            console.log(`Título actualizado: ${this.title()}`);
+            console.log(`Contador: ${this.count()}`);
+            console.log(`Nombre: ${this.name()}`);
+        });
+    }
+}
+</code></pre>
+            </div>
+
+            <div class="tip">
+                <strong>Ventajas:</strong>
+                <ul>
+                    <li>Tipado más fuerte y seguro</li>
+                    <li>Transformación de valores en la declaración</li>
+                    <li>Integración perfecta con el sistema de Signals</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 26 -->
+        <section id="signal-updates">
+            <h2><i class="fas animate-icon fa-sync-alt"></i> Actualizando Valores de Signals</h2>
+            <p>
+                Qué trata: Diferentes técnicas para actualizar signals: <code>set</code>, <code>update</code>, y patrones para objetos y arrays.
+            </p>
+            <p>
+                Explicación del código: Se muestran ejemplos prácticos de cada técnica y recomendaciones para mantener la
+                inmutabilidad (crear nuevas referencias para objetos/arrays) y evitar mutaciones directas.
+            </p>
+
+            <div class="code-block">
+                <pre><code class="language-typescript">
+@Component({
+    selector: 'app-signal-updates',
+    template: `
+        &lt;div&gt;
+            &lt;p&gt;Contador: {{ counter() }}&lt;/p&gt;
+            &lt;p&gt;Objeto: {{ user() | json }}&lt;/p&gt;
+            &lt;p&gt;Lista: {{ items() | json }}&lt;/p&gt;
+
+            &lt;button (click)="increment()"&gt;Incrementar&lt;/button&gt;
+            &lt;button (click)="updateUser()"&gt;Actualizar Usuario&lt;/button&gt;
+            &lt;button (click)="addItem()"&gt;Agregar Item&lt;/button&gt;
+        &lt;/div&gt;
+    `
+})
+export class SignalUpdatesComponent {
+    // Signal simple
+    counter = signal(0);
+
+    // Signal con objeto
+    user = signal&lt;{name: string; age: number}&gt;({
+        name: 'Ana',
+        age: 25
+    });
+
+    // Signal con array
+    items = signal&lt;string[]&gt;([]);
+
+    // Actualización simple
+    increment() {
+        // Método 1: set
+        this.counter.set(this.counter() + 1);
+
+        // Método 2: update
+        this.counter.update(value => value + 1);
+    }
+
+    // Actualización de objeto
+    updateUser() {
+        // Método 1: actualización completa
+        this.user.set({
+            name: 'Ana López',
+            age: 26
+        });
+
+        // Método 2: actualización parcial
+        this.user.update(current => ({
+            ...current,
+            age: current.age + 1
+        }));
+    }
+
+    // Actualización de array
+    addItem() {
+        // Método 1: spread operator
+        this.items.update(current => [
+            ...current,
+            `Item ${current.length + 1}`
+        ]);
+
+        // Método 2: mutación con nuevo array
+        this.items.update(current => {
+            const newArray = [...current];
+            newArray.push(`Item ${newArray.length + 1}`);
+            return newArray;
+        });
+    }
+
+    // Actualización basada en múltiples signals
+    updateBasedOnOthers = computed(() => {
+        const count = this.counter();
+        const userName = this.user().name;
+        return `${userName} ha contado hasta ${count}`;
+    });
+}
+</code></pre>
+            </div>
+
+            <div class="warning">
+                <strong>Importante:</strong> Siempre crea nuevas referencias al actualizar objetos o arrays en Signals.
+            </div>
+        </section>
+
+        <!-- 27 -->
+        <section id="state-communication">
+            <h2><i class="fas animate-icon fa-network-wired"></i> Comunicación y Gestión de Estado</h2>
+            <p>
+                Qué trata: Patrones para centralizar estado en servicios usando signals privados/public read-only y signal computed
+                para vistas reactivas sin suscripciones explícitas.
+            </p>
+            <p>
+                Explicación del código: El servicio expone señales públicas (como <code>data</code>, <code>loading</code>) y métodos
+                para actualizar el estado (fetchData, addItem). Los componentes consumen el servicio y enlazan directamente a
+                las signals expuestas.
+            </p>
+
+            <div class="code-block">
+                <pre><code class="language-typescript">
+// Servicio de estado
+@Injectable({ providedIn: 'root' })
+export class StateService {
+    private _data = signal&lt;any[]&gt;([]);
+    private _loading = signal(false);
+    private _error = signal&lt;string | null&gt;(null);
+
+    // Signals públicos
+    data = this._data.asReadonly();
+    loading = this._loading.asReadonly();
+    error = this._error.asReadonly();
+
+    // Signal computado
+    hasData = computed(() => this._data().length > 0);
+
+    async fetchData() {
+        this._loading.set(true);
+        this._error.set(null);
+
+        try {
+            const result = await fetch('/api/data');
+            const data = await result.json();
+            this._data.set(data);
+        } catch (e) {
+            this._error.set(e.message);
+        } finally {
+            this._loading.set(false);
+        }
+    }
+
+    addItem(item: any) {
+        this._data.update(current => [...current, item]);
+    }
+}
+
+// Componente que usa el servicio
+@Component({
+    selector: 'app-state-consumer',
+    template: `
+        &lt;div&gt;
+            &lt;div *ngIf="state.loading()"&gt;Cargando...&lt;/div&gt;
+
+            &lt;div *ngIf="state.error()"&gt;
+                Error: {{ state.error() }}
+            &lt;/div&gt;
+
+            &lt;div *ngIf="state.hasData()"&gt;
+                &lt;ul&gt;
+                    &lt;li *ngFor="let item of state.data()"&gt;
+                        {{ item.name }}
+                    &lt;/li&gt;
+                &lt;/ul&gt;
+            &lt;/div&gt;
+
+            &lt;button (click)="loadData()"&gt;Cargar Datos&lt;/button&gt;
+            &lt;button (click)="addNewItem()"&gt;Agregar Item&lt;/button&gt;
+        &lt;/div&gt;
+    `
+})
+export class StateConsumerComponent {
+    constructor(public state: StateService) {}
+
+    loadData() {
+        this.state.fetchData();
+    }
+
+    addNewItem() {
+        this.state.addItem({
+            id: Date.now(),
+            name: `Nuevo Item ${Date.now()}`
+        });
+    }
+}
+</code></pre>
+            </div>
+        </section>
+
+        <!-- 28 -->
+        <section id="inputs-outputs">
+            <h2><i class="fas animate-icon fa-exchange-alt"></i> Configuración de Inputs y Outputs</h2>
+            <p>
+                Qué trata: Mejores prácticas para configurar inputs con validación/transformaciones y outputs tipados para
+                comunicación robusta entre componentes.
+            </p>
+            <p>
+                Explicación del código: Se muestra un componente configurado (<code>ConfiguredItemComponent</code>) que valida y
+                transforma el input y emite eventos tipados al padre; el padre gestiona estos eventos en una sola función.
+            </p>
+
+            <div class="code-block">
+                <pre><code class="language-typescript">
+// Interfaces
+interface ItemConfig {
+    id: number;
+    name: string;
+    type: 'normal' | 'special';
+}
+
+interface ItemEvent {
+    type: 'select' | 'delete';
+    item: ItemConfig;
+}
+
+@Component({
+    selector: 'app-configured-item',
+    template: `
+        &lt;div [class]="computedClasses()"&gt;
+            &lt;h4&gt;{{ config().name }}&lt;/h4&gt;
+            &lt;p&gt;Tipo: {{ config().type }}&lt;/p&gt;
+
+            &lt;button (click)="onSelect()"&gt;Seleccionar&lt;/button&gt;
+            &lt;button (click)="onDelete()"&gt;Eliminar&lt;/button&gt;
+        &lt;/div&gt;
+    `
+})
+export class ConfiguredItemComponent {
+    // Input con validación y transformación
+    @Input({
+        required: true,
+        transform: (value: ItemConfig) => ({
+            ...value,
+            name: value.name.toUpperCase()
+        })
+    })
+    config = input&lt;ItemConfig&gt;();
+
+    // Output tipado
+    @Output() itemEvent = new EventEmitter&lt;ItemEvent&gt;();
+
+    // Classes computadas basadas en input
+    computedClasses = computed(() => ({
+        'item': true,
+        'item-special': this.config().type === 'special'
+    }));
+
+    onSelect() {
+        this.itemEvent.emit({
+            type: 'select',
+            item: this.config()
+        });
+    }
+
+    onDelete() {
+        this.itemEvent.emit({
+            type: 'delete',
+            item: this.config()
+        });
+    }
+}
+
+// Componente padre
+@Component({
+    selector: 'app-item-container',
+    template: `
+        &lt;app-configured-item
+            [config]="itemConfig"
+            (itemEvent)="handleItemEvent($event)"&gt;
+        &lt;/app-configured-item&gt;
+    `
+})
+export class ItemContainerComponent {
+    itemConfig: ItemConfig = {
+        id: 1,
+        name: 'Item Ejemplo',
+        type: 'normal'
+    };
+
+    handleItemEvent(event: ItemEvent) {
+        switch (event.type) {
+            case 'select':
+                console.log('Item seleccionado:', event.item);
+                break;
+            case 'delete':
+                console.log('Item eliminado:', event.item);
+                break;
+        }
+    }
+}
+</code></pre>
+            </div>
+        </section>
+
+        <!-- 29 -->
+        <section id="two-way-custom">
+            <h2><i class="fas animate-icon fa-sync"></i> Vinculación Bidireccional Personalizada</h2>
+            <p>
+                Qué trata: Implementar un componente que exponga una API amigable para vinculación bidireccional personalizada
+                usando inputs/signals y outputs para cambios.
+            </p>
+            <p>
+                Explicación del código: El componente <code>CustomInputComponent</code> implementa un input/outputs para
+                integrarse con <code>[(value)]</code> desde el padre. Esto permite encapsular lógica y mantener compatibilidad
+                con la sintaxis de Angular.
+            </p>
+
+            <div class="code-block">
+                <pre><code class="language-typescript">
+@Component({
+    selector: 'app-custom-input',
+    template: `
+        &lt;div class="custom-input"&gt;
+            &lt;input
+                [value]="value()"
+                (input)="onInput($event)"
+                [disabled]="disabled()"
+            &gt;
+
+            &lt;button (click)="clear()"
+                    [disabled]="disabled()"&gt;
+                Limpiar
+            &lt;/button&gt;
+        &lt;/div&gt;
+    `
+})
+export class CustomInputComponent {
+    // Input para el valor
+    @Input() value = input&lt;string&gt;('');
+
+    // Input para estado deshabilitado
+    @Input() disabled = input&lt;boolean&gt;(false);
+
+    // Output para cambios
+    @Output() valueChange = new EventEmitter&lt;string&gt;();
+
+    onInput(event: Event) {
+        const input = event.target as HTMLInputElement;
+        this.valueChange.emit(input.value);
+    }
+
+    clear() {
+        this.valueChange.emit('');
+    }
+}
+
+// Uso del componente
+@Component({
+    selector: 'app-form',
+    template: `
+        &lt;form&gt;
+            &lt;app-custom-input
+                [(value)]="nombre"
+                [disabled]="formDisabled"&gt;
+            &lt;/app-custom-input&gt;
+
+            &lt;p&gt;Nombre: {{ nombre }}&lt;/p&gt;
+        &lt;/form&gt;
+    `
+})
+export class FormComponent {
+    nombre = signal('');
+    formDisabled = signal(false);
+}
+</code></pre>
+            </div>
+        </section>
+
+        <!-- 30 -->
+        <section id="two-way-easy">
+            <h2><i class="fas animate-icon fa-magic"></i> Vinculación Bidireccional Simplificada</h2>
+            <p>
+                Qué trata: Patrones rápidos para implementar vinculación bidireccional simple con <code>ngModel</code> o
+                con handlers mínimos cuando no se requiere lógica compleja.
+            </p>
+            <p>
+                Explicación del código: El ejemplo muestra signals que representan el estado y manejadores que actualizan
+                dichos signals desde los eventos <code>ngModelChange</code>. Es adecuado para formularios sencillos.
+            </p>
+
+            <div class="code-block">
+                <pre><code class="language-typescript">
+@Component({
+    selector: 'app-easy-binding',
+    template: `
+        &lt;div class="easy-binding"&gt;
+            &lt;input
+                [ngModel]="value()"
+                (ngModelChange)="onValueChange($event)"
+            &gt;
+
+            &lt;select
+                [ngModel]="selected()"
+                (ngModelChange)="onSelectionChange($event)"&gt;
+                &lt;option value="1"&gt;Opción 1&lt;/option&gt;
+                &lt;option value="2"&gt;Opción 2&lt;/option&gt;
+            &lt;/select&gt;
+
+            &lt;div class="preview"&gt;
+                Valor: {{ value() }}
+                Seleccionado: {{ selected() }}
+            &lt;/div&gt;
+        &lt;/div&gt;
+    `
+})
+export class EasyBindingComponent {
+    // Signals para el estado
+    value = signal('');
+    selected = signal('1');
+
+    // Manejadores de cambios
+    onValueChange(newValue: string) {
+        this.value.set(newValue);
+        this.emitChanges();
+    }
+
+    onSelectionChange(newSelection: string) {
+        this.selected.set(newSelection);
+        this.emitChanges();
+    }
+
+    private emitChanges() {
+        // Emitir cambios combinados si es necesario
+        console.log('Estado actualizado:', {
+            value: this.value(),
+            selected: this.selected()
+        });
+    }
+}
+</code></pre>
+            </div>
+
+            <div class="tip">
+                <strong>Consejo:</strong> Esta aproximación simplificada es ideal para componentes que no requieren una lógica compleja de vinculación bidireccional.
+            </div>
+        </section>
+    </main>
+</body>
+</html>
