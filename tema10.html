@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Tutorial Angular: Parte 10 - Detección de Cambios y OnPush</title>
+    <link rel="stylesheet" href="./assets/css/prism-tomorrow.min.css">
+    <script src="./assets/js/prism.min.js"></script>
+    <script src="./assets/js/prism-typescript.min.js"></script>
+    <link rel="stylesheet" href="./assets/css/all.min.css">
+    <link rel="stylesheet" href="./assets/css/animate.min.css">
+    <style>
+        /* Estilos coherentes con tema7/tema9 */
+        body { font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin:0; padding:0; background:#f4f4f4; color:#333; line-height:1.6; }
+        header { background: linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:#fff; padding:1rem 0; text-align:center; box-shadow:0 2px 10px rgba(0,0,0,0.1); }
+        nav { position:fixed; left:0; top:80px; width:250px; height:calc(100vh - 80px); background:#fff; overflow-y:auto; padding:1rem 0; box-shadow:2px 0 10px rgba(0,0,0,0.1); }
+        nav ul{ list-style:none; padding:0; }
+        nav li{ padding:0.5rem 1rem; }
+        nav a{ text-decoration:none; color:#333; display:block; transition:background .25s; }
+        nav a:hover{ background:#f0f0f0; border-right:3px solid #667eea; }
+        main{ margin-left:250px; padding:2rem; max-width:1000px; counter-reset: theme-counter; }
+        section{ background:#fff; padding:1.6rem; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.05); margin-bottom:2rem; }
+        section h2{ display:flex; align-items:center; gap:.75rem; font-size:1.25rem; }
+        section h2::before{ counter-increment: theme-counter; content:counter(theme-counter); display:inline-flex; align-items:center; justify-content:center; width:2.1rem; height:2.1rem; background:linear-gradient(135deg,#5a67d8 0%,#7b61d1 100%); color:#fff; border-radius:50%; font-weight:700; box-shadow:0 4px 10px rgba(102,126,234,0.18); }
+        pre{ background:#1e1e2a; padding:1rem; border-radius:6px; overflow-x:auto; margin:.8rem 0; }
+        code{ font-family:'Fira Code', monospace; color:inherit; }
+        .muted{ color:#666; }
+        .note{ background:#fff3cd; border-left:4px solid #ffc107; padding:1rem; margin:1rem 0; }
+        .tip{ background:#d4edda; border-left:4px solid #28a745; padding:1rem; margin:1rem 0; }
+        .warning{ background:#f8d7da; border-left:4px solid #dc3545; padding:1rem; margin:1rem 0; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Parte 10 — Detección de Cambios y OnPush en Angular</h1>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="#project"><i class="fas fa-project-diagram animate-icon"></i> Proyecto de Detección</a></li>
+            <li><a href="#intro"><i class="fas fa-search animate-icon"></i> Introducción</a></li>
+            <li><a href="#expression-error"><i class="fas fa-exclamation-circle animate-icon"></i> ExpressionChangedAfterChecked</a></li>
+            <li><a href="#efficient-bindings"><i class="fas fa-link animate-icon"></i> Enlaces de Plantilla Eficientes</a></li>
+            <li><a href="#zone-contamination"><i class="fas fa-bolt animate-icon"></i> Evitar Contaminación de Zone</a></li>
+            <li><a href="#onpush-use"><i class="fas fa-angle-double-up animate-icon"></i> Usar OnPush</a></li>
+            <li><a href="#onpush-understand"><i class="fas fa-brain animate-icon"></i> Entender OnPush</a></li>
+            <li><a href="#onpush-signals"><i class="fas fa-signal animate-icon"></i> OnPush + Signals</a></li>
+            <li><a href="#signals-sharing"><i class="fas fa-exchange-alt animate-icon"></i> Signals para Compartir Datos</a></li>
+            <li><a href="#onpush-no-signals"><i class="fas fa-ban animate-icon"></i> OnPush sin Signals</a></li>
+            <li><a href="#manual-detection"><i class="fas fa-cogs animate-icon"></i> Detección Manual / RxJS</a></li>
+            <li><a href="#async-pipe"><i class="fas fa-play animate-icon"></i> Pipe Async</a></li>
+            <li><a href="#without-zone"><i class="fas fa-globe animate-icon"></i> Trabajando sin Zone</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- 1 -->
+        <section id="project">
+            <h2><i class="fas fa-project-diagram"></i> Proyecto de Detección de Cambios en Angular</h2>
+            <p class="muted">Qué trata: Propuesta de un pequeño proyecto para experimentar la detección de cambios: componentes padres/hijos, OnPush, señales y observables.</p>
+            <p>Explicación: La idea es crear una app con un contador central, un servicio que expone signals/observables y varios componentes (OnPush y Default) para observar diferencias de comportamiento y rendimiento.</p>
+            <div class="example">
+                <pre><code class="language-typescript">// Estructura del proyecto (ejemplo)
+// app/
+//  - services/counter.service.ts
+//  - components/counter-display (OnPush)
+//  - components/counter-controls (Default)
+</code></pre>
+            </div>
+        </section>
+
+        <!-- 2 -->
+        <section id="intro">
+            <h2><i class="fas fa-search"></i> Introducción a la Detección de Cambios</h2>
+            <p class="muted">Qué trata: Conceptos básicos: change detection, zones, estrategias y triggers.</p>
+            <p>Explicación: Angular detecta cambios y actualiza la vista. Por defecto usa la estrategia CheckAlways que verifica el árbol de componentes en cada ciclo de detección. OnPush limita las verificaciones a inputs por referencia o eventos explícitos.</p>
+            <div class="example">
+                <pre><code class="language-typescript">// Default (comprobación siempre) vs OnPush
+@Component({ selector:'c-default', template:'...', changeDetection: ChangeDetectionStrategy.Default })
+export class CDefault {}
+
+@Component({ selector:'c-onpush', template:'...', changeDetection: ChangeDetectionStrategy.OnPush })
+export class COnPush {}</code></pre>
+            </div>
+        </section>
+
+        <!-- 3 -->
+        <section id="expression-error">
+            <h2><i class="fas fa-exclamation-circle"></i> Error ExpressionChangedAfterChecked</h2>
+            <p class="muted">Qué trata: Por qué ocurre este error y cómo solucionarlo.</p>
+            <p>Explicación: El error ocurre cuando una expresión cambia entre la comprobación y la verificación posterior (por ejemplo cambiar un valor en ngAfterViewInit). Soluciones: mover el cambio a ngOnInit, usar setTimeout (microtask) o marcar para detección manual con ChangeDetectorRef.</p>
+            <div class="example">
+                <pre><code class="language-typescript">// CAUSA
+ngAfterViewInit() {
+  this.visible = true; // puede lanzar ExpressionChangedAfterChecked
+}
+
+// SOLUCIÓN simple
+ngAfterViewInit() {
+  setTimeout(() =&gt; this.visible = true);
+}
+
+// O mejor: usar ChangeDetectorRef
+constructor(private cdr: ChangeDetectorRef){}
+ngAfterViewInit(){ this.visible = true; this.cdr.detectChanges(); }</code></pre>
+            </div>
+            <div class="tip">Preferir cdr.detectChanges() o reestructurar la lógica en vez de abusar de setTimeout.</div>
+        </section>
+
+        <!-- 4 -->
+        <section id="efficient-bindings">
+            <h2><i class="fas fa-link"></i> Escribir Enlaces de Plantilla Eficientes</h2>
+            <p class="muted">Qué trata: Buenas prácticas en bindings para evitar cálculos costosos en cada ciclo.</p>
+            <p>Explicación: Evita llamadas a funciones en interpolaciones y usa propiedades computadas, pipes o signals. Si necesitas cálculo, muévelo al componente y cachea el resultado.</p>
+            <div class="example">
+                <pre><code class="language-html"><!-- MAL -->
+&lt;div&gt;Resultado: {{ heavyCalculation() }}&lt;/div&gt;
+
+<!-- BIEN -->
+&lt;div&gt;Resultado: {{ cachedResult }}&lt;/div&gt;</code></pre>
+            </div>
+        </section>
+
+        <!-- 5 -->
+        <section id="zone-contamination">
+            <h2><i class="fas fa-bolt"></i> Evitar la Contaminación del Zone en Angular</h2>
+            <p class="muted">Qué trata: Minimizar operaciones que disparen ciclos innecesarios de zona.js y detección de cambios.</p>
+            <p>Explicación: Algunas APIs o listeners pueden disparar demasiados ciclos (setInterval, scroll, mousemove). Usa runOutsideAngular para evitar que dichas operaciones lancen change detection innecesario.</p>
+            <div class="example">
+                <pre><code class="language-typescript">constructor(private ngZone: NgZone){}
+
+start() {
+  this.ngZone.runOutsideAngular(() =&gt; {
+    window.addEventListener('scroll', this.onScroll);
+  });
+}
+
+stop() { window.removeEventListener('scroll', this.onScroll); }
+
+onScroll = () =&gt; { /* manejar sin disparar zona */ }</code></pre>
+            </div>
+        </section>
+
+        <!-- 6 -->
+        <section id="onpush-use">
+            <h2><i class="fas fa-angle-double-up"></i> Usar la Estrategia OnPush</h2>
+            <p class="muted">Qué trata: Cómo habilitar OnPush y cuándo usarla.</p>
+            <p>Explicación: Use OnPush para componentes con inputs inmutables o que consumen signals/observables. Reduce trabajo de detección y mejora rendimiento en grandes árboles.</p>
+            <div class="example">
+                <pre><code class="language-typescript">@Component({
+  selector: 'app-item',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `&lt;div&gt;{{ item.name }}&lt;/div&gt;`
+})
+export class ItemComponent { @Input() item!: Item; }</code></pre>
+            </div>
+        </section>
+
+        <!-- 7 -->
+        <section id="onpush-understand">
+            <h2><i class="fas fa-brain"></i> Entender la Estrategia OnPush</h2>
+            <p class="muted">Qué trata: qué provoca la comprobación en OnPush: nuevos inputs (por referencia), eventos del componente y manual triggers.</p>
+            <p>Explicación: OnPush sólo comprueba cuando cambian inputs por referencia, cuando se emite un evento dentro del componente (click) o cuando un observable/signals emite y la vista se suscribe correctamente.</p>
+            <div class="example">
+                <pre><code class="language-typescript">// Evita mutar objetos pasados como @Input(), crea nuevas referencias
+this.item = { ...this.item, name: 'nuevo' };
+
+// Para forzar detección
+constructor(private cdr: ChangeDetectorRef){}
+someAction(){ this.cdr.markForCheck(); }</code></pre>
+            </div>
+        </section>
+
+        <!-- 8 -->
+        <section id="onpush-signals">
+            <h2><i class="fas fa-signal"></i> Trabajar con OnPush y Signals</h2>
+            <p class="muted">Qué trata: Integración de la API Signals con componentes OnPush para actualizaciones eficientes.</p>
+            <p>Explicación: Signals proporcionan reactividad que puede integrarse con OnPush; si el componente lee signals en plantilla la vista reaccionará a cambios sin necesidad de inputs por referencia.</p>
+            <div class="example">
+                <pre><code class="language-typescript">// service
+@Injectable({ providedIn: 'root' })
+export class CounterService { count = signal(0); increment(){ this.count.update(n =&gt; n + 1); } }
+
+// componente OnPush
+@Component({ changeDetection: ChangeDetectionStrategy.OnPush, template: `&lt;div&gt;{{ counter.count() }}&lt;/div>` })
+export class CounterView { constructor(public counter: CounterService) {} }
+</code></pre>
+            </div>
+        </section>
+
+        <!-- 9 -->
+        <section id="signals-sharing">
+            <h2><i class="fas fa-exchange-alt"></i> Usar Signals para Compartir Datos Entre Componentes (con OnPush)</h2>
+            <p class="muted">Qué trata: Patrones para exponer signals desde servicios y consumirlos en componentes OnPush para comunicación eficiente.</p>
+            <p>Explicación: Un servicio expone signals públicos; componentes OnPush consumen esas signals (inyección pública) y la UI se actualiza automáticamente cuando la signal cambia.</p>
+            <div class="example">
+                <pre><code class="language-typescript">// counter.service.ts
+@Injectable({ providedIn:'root' })
+export class CounterService { private _count = signal(0); count = this._count.asReadonly(); increment(){ this._count.update(n =&gt; n + 1); } }
+
+// consumer.component.ts (OnPush)
+@Component({ changeDetection: ChangeDetectionStrategy.OnPush, template: `&lt;div&gt;{{ counter.count() }}&lt;/div>` })
+export class ConsumerComp { constructor(public counter: CounterService) {} }
+</code></pre>
+            </div>
+        </section>
+
+        <!-- 10 -->
+        <section id="onpush-no-signals">
+            <h2><i class="fas fa-ban"></i> OnPush sin Signals en Angular</h2>
+            <p class="muted">Qué trata: Técnicas para usar OnPush sin signals — observables, immutability y markForCheck/detectChanges.</p>
+            <p>Explicación: Con observables usa async pipe en plantilla; para objetos, reemplaza referencias en lugar de mutarlas y usa ChangeDetectorRef cuando necesites forzar comprobación.</p>
+            <div class="example">
+                <pre><code class="language-typescript">// Usando Observable + async
+@Component({ changeDetection: ChangeDetectionStrategy.OnPush, template: `&lt;div&gt;{{ user$ | async }}&lt;/div>` })
+export class UserComp { user$ = this.userService.user$; }
+
+// Forzar comprobación
+this.cdr.markForCheck();</code></pre>
+            </div>
+        </section>
+
+        <!-- 11 -->
+        <section id="manual-detection">
+            <h2><i class="fas fa-cogs"></i> Detección de Cambios Manual y con RxJS Subjects</h2>
+            <p class="muted">Qué trata: Uso de ChangeDetectorRef y Subjects para controlar cuándo y qué partes del árbol se actualizan.</p>
+            <p>Explicación: markForCheck(), detectChanges() y detach() ofrecen control fino. Subjects/BehaviorSubject pueden emitir eventos que los componentes OnPush consumen con async pipe.</p>
+            <div class="example">
+                <pre><code class="language-typescript">// ejemplo detectChanges
+constructor(private cdr: ChangeDetectorRef){}
+
+update(){ this.data = fetchNew(); this.cdr.detectChanges(); }
+
+// ejemplo con Subject
+private refresh$ = new Subject&lt;void&gt;();
+this.refresh$.next();
+// plantilla: *ngIf="refresh$ | async as _"
+</code></pre>
+            </div>
+        </section>
+
+        <!-- 12 -->
+        <section id="async-pipe">
+            <h2><i class="fas fa-play"></i> Introducción a la Pipe Async en Angular</h2>
+            <p class="muted">Qué trata: Cómo usar la pipe async con Observables/Promises para suscripción automática y manejo de memoria.</p>
+            <p>Explicación: Async se subscribe y desuscribe automáticamente; úsala en plantillas para mantener componentes limpios. Combina muy bien con OnPush y patterns reactivos.</p>
+            <div class="example">
+                <pre><code class="language-html">&lt;div&gt;Usuario: {{ user$ | async | json }}&lt;/div&gt;
+&lt;!-- en TS: user$ = this.userService.user$; --&gt;</code></pre>
+            </div>
+        </section>
+
+        <!-- 13 -->
+        <section id="without-zone">
+            <h2><i class="fas fa-globe"></i> Trabajando sin Zone en Angular</h2>
+            <p class="muted">Qué trata: Opciones para usar Angular sin zone.js (zone-less) o para minimizar su impacto.</p>
+            <p>Explicación: Angular puede ejecutarse sin zone (con configuración al bootstrap) y usar triggers manuales de detección. Esto reduce overhead de zone.js pero requiere manejo explícito de detección.</p>
+            <div class="example">
+                <pre><code class="language-typescript">// Bootstrap sin zone (conceptual)
+platformBrowserDynamic()
+  .bootstrapModule(AppModule, { ngZone: 'noop' })
+  .catch(err =&gt; console.error(err));
+
+// En componentes se necesita invocar manualmente detectChanges o usar observables + async</code></pre>
+            </div>
+            <div class="note">Advertencia: trabajar sin zone requiere disciplina; muchas APIs y librerías esperan zone.js. Valora antes de migrar.</div>
+        </section>
+
+    </main>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Tutorial Angular: Parte 11 - Observables y Signals</title>
+    <link rel="stylesheet" href="./assets/css/prism-tomorrow.min.css">
+    <script src="./assets/js/prism.min.js"></script>
+    <script src="./assets/js/prism-typescript.min.js"></script>
+    <link rel="stylesheet" href="./assets/css/all.min.css">
+    <link rel="stylesheet" href="./assets/css/animate.min.css">
+    <style>
+        /* Estilos coherentes con los temas anteriores */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin:0; padding:0; background:#f4f4f4; color:#333; line-height:1.6; }
+        header { background: linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:#fff; padding:1rem 0; text-align:center; box-shadow:0 2px 10px rgba(0,0,0,0.1); }
+        nav { position:fixed; left:0; top:80px; width:250px; height:calc(100vh - 80px); background:#fff; overflow-y:auto; padding:1rem 0; box-shadow:2px 0 10px rgba(0,0,0,0.1); }
+        nav ul{ list-style:none; padding:0; }
+        nav li{ padding:0.5rem 1rem; }
+        nav a{ text-decoration:none; color:#333; display:block; transition:background .25s; }
+        nav a:hover{ background:#f0f0f0; border-right:3px solid #667eea; }
+        main{ margin-left:250px; padding:2rem; max-width:1000px; counter-reset: theme-counter; }
+        section{ background:#fff; padding:1.6rem; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.05); margin-bottom:2rem; }
+        section h2{ display:flex; align-items:center; gap:.75rem; font-size:1.25rem; }
+        section h2::before{ counter-increment: theme-counter; content:counter(theme-counter); display:inline-flex; align-items:center; justify-content:center; width:2.1rem; height:2.1rem; background:linear-gradient(135deg,#5a67d8 0%,#7b61d1 100%); color:#fff; border-radius:50%; font-weight:700; box-shadow:0 4px 10px rgba(102,126,234,0.18); }
+        pre{ background:#1e1e2a; padding:1rem; border-radius:6px; overflow-x:auto; margin:.8rem 0; }
+        code{ font-family:'Fira Code', monospace; color:inherit; }
+        .muted{ color:#666; }
+        .note{ background:#fff3cd; border-left:4px solid #ffc107; padding:1rem; margin:1rem 0; }
+        .tip{ background:#d4edda; border-left:4px solid #28a745; padding:1rem; margin:1rem 0; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Parte 11 — Observables y Signals en Angular</h1>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="#what-observables"><i class="fas fa-stream animate-icon"></i> Qué son los Observables y RxJS</a></li>
+            <li><a href="#create-observable"><i class="fas fa-plus-circle animate-icon"></i> Crear y Usar un Observable</a></li>
+            <li><a href="#operators"><i class="fas fa-cogs animate-icon"></i> Operadores RxJS</a></li>
+            <li><a href="#signals"><i class="fas fa-signal animate-icon"></i> Trabajar con Signals</a></li>
+            <li><a href="#signals-vs-obs"><i class="fas fa-balance-scale animate-icon"></i> Signals vs Observables</a></li>
+            <li><a href="#signal-to-obs"><i class="fas fa-exchange-alt animate-icon"></i> Convertir Signals → Observables</a></li>
+            <li><a href="#obs-to-signal"><i class="fas fa-exchange-alt animate-icon"></i> Convertir Observables → Signals</a></li>
+            <li><a href="#custom-observable"><i class="fas fa-tools animate-icon"></i> Observable Personalizado desde Cero</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- 1 -->
+        <section id="what-observables">
+            <h2><i class="fas fa-stream"></i> Qué son los Observables y RxJS</h2>
+            <p class="muted">Qué trata: Concepto fundamental: streams asíncronos y reactividad con RxJS.</p>
+            <p>Explicación: Un Observable es una colección de valores futuros (0..N) que pueden emitirse en el tiempo. RxJS provee herramientas para crear, transformar, combinar y controlar estos streams de manera declarativa.</p>
+            <div class="example">
+                <pre><code class="language-typescript">// idea: un observable representa una secuencia de valores en el tiempo
+const obs = new Observable&lt;number&gt;(observer =&gt; {
+  observer.next(1);
+  setTimeout(() =&gt; observer.next(2), 1000);
+  setTimeout(() =&gt; observer.complete(), 2000);
+});
+
+obs.subscribe({ next: v =&gt; console.log(v), complete: () =&gt; console.log('done') });</code></pre>
+            </div>
+        </section>
+
+        <!-- 2 -->
+        <section id="create-observable">
+            <h2><i class="fas fa-plus-circle"></i> Crear y Usar un Observable en Angular</h2>
+            <p class="muted">Qué trata: Diferentes formas de crear observables y patrones de uso con HttpClient y async pipe.</p>
+            <p>Explicación: Puedes usar creadores como <code>of</code>, <code>from</code>, <code>interval</code>, o crear con <code>new Observable()</code>. En Angular el <code>HttpClient</code> ya devuelve Observables; la pipe <code>async</code> los consume en plantillas.</p>
+            <div class="example">
+                <pre><code class="language-typescript">// ejemplos rápidos
+import { of, from, interval } from 'rxjs';
+
+const o1 = of(1,2,3); // emite 1,2,3 y completa
+const o2 = from(fetch('/api/data').then(r =&gt; r.json()));
+const timer = interval(1000); // 0,1,2,... cada segundo
+
+// uso en Angular con HttpClient
+this.user$ = this.http.get('/api/user'); // usar en plantilla: {{ user$ | async | json }}</code></pre>
+            </div>
+            <div class="tip">Recomendación: evitar subscribirse manualmente en componentes cuando async pipe resuelve la suscripción automáticamente y limpia al destruir.</div>
+        </section>
+
+        <!-- 3 -->
+        <section id="operators">
+            <h2><i class="fas fa-cogs"></i> Trabajar con Operadores de RxJS en Angular</h2>
+            <p class="muted">Qué trata: Uso de operadores map, filter, switchMap, mergeMap, debounceTime, takeUntil, etc.</p>
+            <p>Explicación: Los operadores transforman y controlan el flujo. <code>switchMap</code> es útil para cancelar peticiones anteriores; <code>mergeMap</code> cuando quieres mantener múltiples inner streams; <code>takeUntil</code> para limpieza.</p>
+            <div class="example">
+                <pre><code class="language-typescript">// ejemplo: buscar con debounce y switchMap
+this.search$ = new Subject&lt;string&gt;();
+this.results$ = this.search$.pipe(
+  debounceTime(300),
+  filter(term =&gt; term.length &gt; 2),
+  switchMap(term =&gt; this.http.get(`/api/search?q=${term}`))
+);
+
+// limpieza con takeUntil
+private destroy$ = new Subject&lt;void&gt;();
+this.some$().pipe(takeUntil(this.destroy$)).subscribe();
+ngOnDestroy(){ this.destroy$.next(); this.destroy$.complete(); }</code></pre>
+            </div>
+        </section>
+
+        <!-- 4 -->
+        <section id="signals">
+            <h2><i class="fas fa-signal"></i> Trabajar con Signals en Angular</h2>
+            <p class="muted">Qué trata: Introducción a signals: signal(), computed(), effect().</p>
+            <p>Explicación: Signals son primitivas reactivas de Angular (valor/función). <code>signal</code> almacena estado, <code>computed</code> deriva valores, y <code>effect</code> reacciona a cambios.</p>
+            <div class="example">
+                <pre><code class="language-typescript">import { signal, computed, effect } from '@angular/core';
+
+const count = signal(0);
+const doubled = computed(() =&gt; count() * 2);
+effect(() =&gt; console.log('doubled', doubled()));
+count.set(2); // effect ejecuta y muestra doubled 4</code></pre>
+            </div>
+        </section>
+
+        <!-- 5 -->
+        <section id="signals-vs-obs">
+            <h2><i class="fas fa-balance-scale"></i> Signals vs Observables</h2>
+            <p class="muted">Qué trata: Comparación de modelos reactividad, casos de uso y ventajas/desventajas.</p>
+            <p>Explicación: Signals son primitivos síncronos y simples para estado local y derivado; Observables modelan streams asíncronos y tienen API rica (combinación, operadores). Signals son pull-based y fáciles de leer en plantilla; Observables son push-based y mejores para IO/streams múltiples.</p>
+            <div class="example">
+                <pre><code class="language-typescript">// Signals: mejor para estado local y derivaciones
+const s = signal(1);
+const c = computed(() =&gt; s() + 1);
+
+// Observables: mejor para eventos asíncronos y composición con operadores
+const clicks$ = fromEvent(document, 'click');</code></pre>
+            </div>
+            <div class="note">Regla práctica: usar signals para estado local y reactividad simple; usar observables para IO, streams y operadores complejos.</div>
+        </section>
+
+        <!-- 6 -->
+        <section id="signal-to-obs">
+            <h2><i class="fas fa-exchange-alt"></i> Convertir Signals a Observables en Angular</h2>
+            <p class="muted">Qué trata: Técnicas para exponer signals como Observables cuando una API requiere observables.</p>
+            <p>Explicación: No hay un helper estándar en todas las versiones; una forma segura es crear un Observable que se actualice cuando la signal cambie usando <code>effect</code> y el patrón observer.</p>
+            <div class="example">
+                <pre><code class="language-typescript">import { Observable } from 'rxjs';
+import { effect } from '@angular/core';
+
+function signalToObservable&lt;T&gt;(sig: { (): T }) : Observable&lt;T&gt; {
+  return new Observable&lt;T&gt;(observer =&gt; {
+    // emitir valor inicial
+    observer.next(sig());
+
+    // crear effect que emite cada vez que la signal cambia
+    const stop = effect(() =&gt; {
+      observer.next(sig());
+    });
+
+    // cleanup cuando alguien se desuscribe
+    return () =&gt; stop();
+  });
+}
+
+// uso
+const obs = signalToObservable(count);
+obs.subscribe(v =&gt; console.log('count via obs', v));</code></pre>
+            </div>
+            <div class="tip">Nota: el Observable devuelto es cold y comienza a emitir cuando hay suscriptores; el effect se limpia al desuscribirse.</div>
+        </section>
+
+        <!-- 7 -->
+        <section id="obs-to-signal">
+            <h2><i class="fas fa-exchange-alt"></i> Convertir Observables a Signals en Angular</h2>
+            <p class="muted">Qué trata: Usar utilidades para transformar Observables en Signals para consumo en plantillas y código reactivo.</p>
+            <p>Explicación: Angular ofrece helpers (como <code>toSignal</code>) en algunas versiones; alternativa manual es subscribirse y actualizar una signal dentro de la suscripción, cuidando limpieza con takeUntil o ngOnDestroy.</p>
+            <div class="example">
+                <pre><code class="language-typescript">// usando toSignal (si está disponible)
+import { toSignal } from '@angular/core/rxjs-interop';
+
+const userSignal = toSignal(this.userService.user$);
+
+// alternativa manual
+const user = signal(null as any);
+const sub = this.userService.user$.subscribe(v =&gt; user.set(v));
+// recordar unsubscribir en ngOnDestroy: sub.unsubscribe();</code></pre>
+            </div>
+        </section>
+
+        <!-- 8 -->
+        <section id="custom-observable">
+            <h2><i class="fas fa-tools"></i> Observable Personalizado desde Cero en Angular</h2>
+            <p class="muted">Qué trata: Implementar un Observable manualmente para exponer lógica personalizada y limpiar recursos correctamente.</p>
+            <p>Explicación: Al crear un Observable manual, provees una función que recibe un <code>observer</code>. Debes emitir valores con <code>next</code>, señalizar errores con <code>error</code>, completar con <code>complete</code> y devolver una función de limpieza que se ejecuta al desuscribirse.</p>
+            <div class="example">
+                <pre><code class="language-typescript">import { Observable } from 'rxjs';
+
+function createTicker(intervalMs = 1000) : Observable&lt;number&gt; {
+  return new Observable&lt;number&gt;(observer =&gt; {
+    let i = 0;
+    const id = setInterval(() =&gt; observer.next(i++), intervalMs);
+
+    // cuando el suscriptor se desuscribe, limpiar
+    return () =&gt; clearInterval(id);
+  });
+}
+
+// uso
+const tick$ = createTicker(500);
+const sub = tick$.subscribe(v =&gt; console.log('tick', v));
+setTimeout(() =&gt; sub.unsubscribe(), 5000);</code></pre>
+            </div>
+            <div class="note">Importante: siempre implementar cleanup para evitar fugas (timers, listeners, subscripciones internas).</div>
+        </section>
+
+    </main>
+</body>
+</html>

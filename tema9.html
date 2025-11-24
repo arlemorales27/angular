@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial Angular: Parte 9 - Servicios e Inyección de Dependencias</title>
+    <link rel="stylesheet" href="./assets/css/prism-tomorrow.min.css">
+    <script src="./assets/js/prism.min.js"></script>
+    <script src="./assets/js/prism-typescript.min.js"></script>
+    <link rel="stylesheet" href="./assets/css/all.min.css">
+    <link rel="stylesheet" href="./assets/css/animate.min.css">
+    <style>
+        /* --- Estilos consistentes con tema7/tema8 --- */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height:1.6; margin:0; padding:0; background:#f4f4f4; color:#333; }
+        header { background: linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:#fff; padding:1rem 0; text-align:center; box-shadow:0 2px 10px rgba(0,0,0,0.1); }
+        nav { position:fixed; left:0; top:80px; width:250px; height:calc(100vh - 80px); background:#fff; overflow-y:auto; padding:1rem 0; box-shadow:2px 0 10px rgba(0,0,0,0.1); }
+        nav ul{ list-style:none; padding:0; }
+        nav li{ padding:0.5rem 1rem; }
+        nav a{ text-decoration:none; color:#333; display:block; transition:background .3s; }
+        nav a:hover{ background:#f0f0f0; border-right:3px solid #667eea; }
+        main{ margin-left:250px; padding:2rem; max-width:1000px; counter-reset: theme-counter; }
+        section{ margin-bottom:2.5rem; background:#fff; padding:1.6rem; border-radius:8px; box-shadow:0 2px 10px rgba(0,0,0,0.05); }
+        section h2{ display:flex; align-items:center; gap:.75rem; font-size:1.25rem; }
+        section h2::before{ counter-increment: theme-counter; content:counter(theme-counter); display:inline-flex; align-items:center; justify-content:center; width:2.1rem; height:2.1rem; background:linear-gradient(135deg,#5a67d8 0%,#7b61d1 100%); color:white; border-radius:50%; font-weight:700; box-shadow:0 4px 10px rgba(102,126,234,0.18); }
+        section h2 i{ color:#667eea; font-size:1.05rem; }
+        @media (max-width:600px){ section h2::before{ width:1.8rem; height:1.8rem; } }
+        pre{ background:#1e1e2a; padding:1rem; border-radius:6px; overflow-x:auto; margin:.8rem 0; }
+        code{ font-family:'Fira Code', monospace; color:inherit; }
+        .muted{ color:#666; }
+        .note{ background:#fff3cd; border-left:4px solid #ffc107; padding:1rem; margin:1rem 0; }
+        .tip{ background:#d4edda; border-left:4px solid #28a745; padding:1rem; margin:1rem 0; }
+        .warning{ background:#f8d7da; border-left:4px solid #dc3545; padding:1rem; margin:1rem 0; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Parte 9 — Servicios e Inyección de Dependencias en Angular</h1>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="#centralized-services"><i class="fas fa-server animate-icon"></i> Servicios Centralizados</a></li>
+            <li><a href="#create-service"><i class="fas fa-plus-square animate-icon"></i> Crear un Servicio</a></li>
+            <li><a href="#dont-provide"><i class="fas fa-ban animate-icon"></i> Cómo NO Proveer un Servicio</a></li>
+            <li><a href="#di-mechanism"><i class="fas fa-syringe animate-icon"></i> Mecanismo DI</a></li>
+            <li><a href="#alt-syntax"><i class="fas fa-code-branch animate-icon"></i> Sintaxis Alternativa DI</a></li>
+            <li><a href="#extract-logic"><i class="fas fa-recycle animate-icon"></i> Externalizar Lógica</a></li>
+            <li><a href="#many-injectors"><i class="fas fa-layer-group animate-icon"></i> ¡Muchos Inyectores!</a></li>
+            <li><a href="#provide-ways"><i class="fas fa-boxes animate-icon"></i> Formas de Proveer</a></li>
+            <li><a href="#element-injector"><i class="fas fa-cube animate-icon"></i> Element Injector</a></li>
+            <li><a href="#element-behavior"><i class="fas fa-info-circle animate-icon"></i> Comportamiento Element Injector</a></li>
+            <li><a href="#inject-in-services"><i class="fas fa-network-wired animate-icon"></i> Inyectar Servicios en Servicios</a></li>
+            <li><a href="#devtools"><i class="fas fa-tools animate-icon"></i> DI con DevTools</a></li>
+            <li><a href="#tokens-providers"><i class="fas fa-tags animate-icon"></i> Tokens y Proveedores</a></li>
+            <li><a href="#non-class-value"><i class="fas fa-box-open animate-icon"></i> Valor No-Clase</a></li>
+            <li><a href="#inject-other-values"><i class="fas fa-hashtag animate-icon"></i> Inyectar Otros Valores</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- 1 -->
+        <section id="centralized-services">
+            <h2><i class="fas fa-server"></i> Servicios Centralizados</h2>
+            <p class="muted">Qué trata: Concepto y ventajas de centralizar lógica y estado compartido en servicios en lugar de en componentes.</p>
+            <p>Explicación: Los servicios facilitan reutilización, testabilidad y separación de responsabilidades. Un servicio puede exponer métodos, signals, observables o estado que múltiples componentes consumen.</p>
+            <div class="example">
+                <pre><code class="language-typescript">// Ejemplo sencillo: servicio centralizado
+@Injectable({ providedIn: 'root' })
+export class CartService {
+  private _items = signal&lt;any[]&gt;([]);
+  items = this._items.asReadonly();
+
+  add(item: any) { this._items.update(a =&gt; [...a, item]); }
+  remove(id: number) { this._items.update(a =&gt; a.filter(i =&gt; i.id !== id)); }
+}</code></pre>
+            </div>
+            <div class="note">Beneficio: los componentes solo consumen la API del servicio, manteniendo las plantillas y la lógica de UI limpias.</div>
+        </section>
+
+        <!-- 2 -->
+        <section id="create-service">
+            <h2><i class="fas fa-plus-square"></i> Crear un Servicio en Angular</h2>
+            <p class="muted">Qué trata: Paso a paso para crear un servicio (CLI y manual), registro y uso básico.</p>
+            <p>Explicación: Con CLI: <code>ng generate service services/logger</code>. Manualmente, crear la clase con <code>@Injectable()</code> y elegir el scope de provisión.</p>
+
+            <div class="example">
+                <pre><code class="language-typescript">// logger.service.ts
+import { Injectable } from '@angular/core';
+
+@Injectable({ providedIn: 'root' })
+export class LoggerService {
+  log(msg: string) { console.log('[LOG]', msg); }
+}
+
+// uso en componente
+constructor(private logger: LoggerService) { this.logger.log('Inicio'); }</code></pre>
+            </div>
+        </section>
+
+        <!-- 3 -->
+        <section id="dont-provide">
+            <h2><i class="fas fa-ban"></i> Cómo NO Proveer un Servicio en Angular</h2>
+            <p class="muted">Qué trata: Prácticas incorrectas que provocan instancias duplicadas o fugas de memoria.</p>
+            <p>Explicación: Evita crear instancias manuales con <code>new</code> en componentes o servicios; esto rompe el árbol de inyectores y dificulta pruebas y reemplazos.</p>
+            <div class="example">
+                <pre><code class="language-typescript">// MAL: crear instancia manual
+constructor() {
+  const s = new LoggerService(); // evita esto
+  s.log('hola');
+}
+
+// BIEN: usar DI
+constructor(private logger: LoggerService) { this.logger.log('hola'); }</code></pre>
+            </div>
+            <div class="warning">Nunca uses <code>new</code> para servicios que deberían ser gestionados por Angular.</div>
+        </section>
+
+        <!-- 4 -->
+        <section id="di-mechanism">
+            <h2><i class="fas fa-syringe"></i> Mecanismo de Inyección de Dependencias de Angular</h2>
+            <p class="muted">Qué trata: Cómo Angular resuelve dependencias: tokens, inyectores y provider records.</p>
+            <p>Explicación: Al solicitar un servicio, Angular busca en el injector del componente y sube por la jerarquía hasta encontrar un provider que provea el token. Si no existe, lanza un error o usa el provider por defecto.</p>
+            <div class="example">
+                <pre><code class="language-typescript">// Petición de dependencia en un constructor
+constructor(private svc: CartService) {}
+
+// Angular traduce 'CartService' al token y busca en el injector correspondiente</code></pre>
+            </div>
+        </section>
+
+        <!-- 5 -->
+        <section id="alt-syntax">
+            <h2><i class="fas fa-code-branch"></i> Sintaxis Alternativa para Inyección de Dependencias</h2>
+            <p class="muted">Qué trata: Inyección con <code>inject()</code> y providers en parámetros (Angular 14+ features).</p>
+            <p>Explicación: Además del constructor, Angular ofrece la función <code>inject</code> para obtener dependencias en módulos, providers o funciones top-level (útil en factories).</p>
+            <div class="example">
+                <pre><code class="language-typescript">import { inject } from '@angular/core';
+
+export function createApi() {
+  const http = inject(HttpClient);
+  return new ApiClient(http);
+}
+
+// Usado como factory provider
+{ provide: ApiClient, useFactory: createApi }
+</code></pre>
+            </div>
+            <div class="tip">La sintaxis <code>inject()</code> permite escribir providers basados en factories con acceso a otros servicios.</div>
+        </section>
+
+        <!-- 6 -->
+        <section id="extract-logic">
+            <h2><i class="fas fa-recycle"></i> Externalizar y Reutilizar la Lógica con Servicios</h2>
+            <p class="muted">Qué trata: Separar lógica de negocio, reutilizar validaciones, accesos a APIs y transformación de datos en servicios.</p>
+            <p>Explicación: Mover lógica fuera de componentes facilita testing unitario y reduce duplicación. Servicios pueden inyectarse en múltiples componentes o en otros servicios.</p>
+            <div class="example">
+                <pre><code class="language-typescript">// auth.service.ts
+@Injectable({ providedIn: 'root' })
+export class AuthService {
+  private token = signal&lt;string | null&gt;(null);
+  login(creds: Credentials) { /* llamar API y set token */ }
+  logout() { this.token.set(null); }
+  isAuthenticated() { return !!this.token(); }
+}
+
+// component.ts
+constructor(private auth: AuthService) {}
+ngOnInit(){ if(this.auth.isAuthenticated()) { /* ... */ } }
+</code></pre>
+            </div>
+        </section>
+
+        <!-- 7 -->
+        <section id="many-injectors">
+            <h2><i class="fas fa-layer-group"></i> ¡Angular Tiene Muchos Inyectores!</h2>
+            <p class="muted">Qué trata: Jerarquía de inyectores: root, platform, module, component, element.</p>
+            <p>Explicación: Cada nivel puede proveer su propia instancia. Entender la jerarquía es clave para controlar el alcance (scope) de los servicios.</p>
+            <div class="example">
+                <pre><code class="language-typescript">// Proveer en el componente crea una instancia por componente
+@Component({
+  selector: 'my-comp',
+  providers: [LocalService]
+})
+export class MyComp {
+  constructor(private svc: LocalService){}
+}
+
+// Mientras que providedIn:'root' entrega una única instancia a nivel de aplicación
+</code></pre>
+            </div>
+            <div class="note">Consejo: Provée en componentes para encapsular estado; provée en root para singletons.</div>
+        </section>
+
+        <!-- 8 -->
+        <section id="provide-ways">
+            <h2><i class="fas fa-boxes"></i> Múltiples Formas de Proveer un Servicio</h2>
+            <p class="muted">Qué trata: Diferentes opciones: providedIn, providers array, useClass/useExisting/useValue/useFactory.</p>
+            <p>Explicación: Cada forma adapta el comportamiento: sustitución, aliasing, factories, valores primitivos, etc.</p>
+            <div class="example">
+                <pre><code class="language-typescript">// useClass: sustituir implementación
+{ provide: LoggerService, useClass: ConsoleLogger }
+
+// useExisting: alias a otro provider
+{ provide: ILogger, useExisting: LoggerService }
+
+// useValue: valor simple
+{ provide: APP_NAME, useValue: 'MiApp' }
+
+// useFactory con inyección
+{ provide: ApiClient, useFactory: createApi, deps: [HttpClient] }</code></pre>
+            </div>
+        </section>
+
+        <!-- 9 -->
+        <section id="element-injector">
+            <h2><i class="fas fa-cube"></i> Proveer Servicios a través del Element Injector</h2>
+            <p class="muted">Qué trata: El elemento DOM puede actuar como un punto para proveer servicios (Element Injector), especialmente útil con Web Components y elementos personalizados.</p>
+            <p>Explicación: Angular puede asociar inyectores a elementos (p. ej. en componentes standalone o con APIs de elementos) permitiendo scope por subtree del DOM.</p>
+            <div class="example">
+                <pre><code class="language-typescript">// Example conceptual: proveer por elemento
+@Component({
+  selector: 'feature-widget',
+  providers: [FeatureService]
+})
+export class FeatureWidget {}
+
+// Cada &lt;feature-widget&gt; tendrá su propia instancia de FeatureService</code></pre>
+            </div>
+            <div class="note">El element injector es útil cuando el servicio debe vivir solo mientras exista ese subtree DOM.</div>
+        </section>
+
+        <!-- 10 -->
+        <section id="element-behavior">
+            <h2><i class="fas fa-info-circle"></i> Entender el Comportamiento del Element Injector</h2>
+            <p class="muted">Qué trata: Ciclo de vida, destrucción y alcance del element injector.</p>
+            <p>Explicación: Cuando el elemento se crea, Angular crea el injector asociado; al remover el elemento el injector también se destruye, liberando instancias y triggers ngOnDestroy.</p>
+            <div class="example">
+                <pre><code class="language-typescript">// Componente con provider a nivel de elemento
+@Component({ selector:'x-panel', providers:[PanelService] })
+export class PanelComponent implements OnDestroy {
+  constructor(private svc: PanelService){}
+  ngOnDestroy(){ console.log('Panel y su servicio destruidos'); }
+}
+
+// Si el host es removido, PanelService.ngOnDestroy será llamado por Angular
+// En plantilla usar &lt;x-panel&gt; para declarar el componente</code></pre>
+            </div>
+        </section>
+
+        <!-- 11 -->
+        <section id="inject-in-services">
+            <h2><i class="fas fa-network-wired"></i> Inyectar Servicios en Otros Servicios</h2>
+            <p class="muted">Qué trata: Composición de servicios: cuándo inyectar un servicio en otro y cómo evitar ciclos.</p>
+            <p>Explicación: Es común inyectar servicios (p. ej. HttpClient) en servicios más altos de nivel. Evita dependencias circulares; si las necesitas, usa forwardRef o rediseña la responsabilidad.</p>
+            <div class="example">
+                <pre><code class="language-typescript">@Injectable({ providedIn:'root' })
+export class ApiService {
+  constructor(private http: HttpClient, private auth: AuthService){}
+
+  getUser(){ return this.http.get('/me'); }
+}
+
+// Evitar
+// ServiceA -> ServiceB -> ServiceA (circular) ; rediseña para eliminar ciclos</code></pre>
+            </div>
+        </section>
+
+        <!-- 12 -->
+        <section id="devtools">
+            <h2><i class="fas fa-tools"></i> Analizando la Inyección con DevTools de Angular</h2>
+            <p class="muted">Qué trata: Uso de Angular DevTools para inspeccionar providers, inyectors y scopes en la aplicación.</p>
+            <p>Explicación: Angular DevTools muestra la jerarquía de componentes e inyectors y permite ver qué provider está resolviendo un token; útil para depurar instancias inesperadas.</p>
+            <div class="example">
+                <pre><code class="language-html"><!-- En DevTools verás algo similar a: -->
+Component Tree
+├─ AppComponent (injector: root)
+│  ├─ HeaderComponent (injector: component)
+│  └─ FeatureWidget (injector: element) - providers: [FeatureService]
+</code></pre>
+            </div>
+            <div class="tip">Usa DevTools para identificar de dónde proviene una instancia si ves más de una en la app.</div>
+        </section>
+
+        <!-- 13 -->
+        <section id="tokens-providers">
+            <h2><i class="fas fa-tags"></i> Tokens y Proveedores Personalizados</h2>
+            <p class="muted">Qué trata: Tokens no basados en clases para inyectar valores o interfaces.</p>
+            <p>Explicación: Para inyectar tipos que no son clases (por ejemplo interfaces o valores), se usan <code>InjectionToken</code> y providers con <code>useValue</code> o <code>useFactory</code>.</p>
+            <div class="example">
+                <pre><code class="language-typescript">// Definir token
+export const API_URL = new InjectionToken&lt;string&gt;('API_URL');
+
+// Proveer en módulo
+{ provide: API_URL, useValue: 'https://api.example.com' }
+
+// Inyectar
+constructor(@Inject(API_URL) private url: string){}
+</code></pre>
+            </div>
+        </section>
+
+        <!-- 14 -->
+        <section id="non-class-value">
+            <h2><i class="fas fa-box-open"></i> Preparando un Valor No-Clase para la Inyección</h2>
+            <p class="muted">Qué trata: Proveer configuraciones, constantes o funciones como valores inyectables.</p>
+            <p>Explicación: Use <code>useValue</code> para inyectar objetos literales y <code>useFactory</code> cuando necesite crear el valor con lógica o dependencias.</p>
+            <div class="example">
+                <pre><code class="language-typescript">// Config global
+export const APP_CONFIG = new InjectionToken&lt;AppConfig&gt;('APP_CONFIG');
+
+const config: AppConfig = { name: 'MiApp', version: '1.0' };
+
+{ provide: APP_CONFIG, useValue: config }
+
+// Inyectar
+constructor(@Inject(APP_CONFIG) private cfg: AppConfig){}
+</code></pre>
+            </div>
+        </section>
+
+        <!-- 15 -->
+        <section id="inject-other-values">
+            <h2><i class="fas fa-hashtag"></i> Inyectando Otros Valores (NO Servicios)</h2>
+            <p class="muted">Qué trata: Inyección de strings, números, funciones, objetos y cómo tiparlos con InjectionToken.</p>
+            <p>Explicación: Para valores primitivos o estructuras, siempre use InjectionToken para evitar colisiones y mejorar tipado.</p>
+            <div class="example">
+                <pre><code class="language-typescript">// Valor primitivo
+export const API_TIMEOUT = new InjectionToken&lt;number&gt;('API_TIMEOUT');
+{ provide: API_TIMEOUT, useValue: 5000 }
+
+constructor(@Inject(API_TIMEOUT) private timeout: number){}
+
+// Función
+export const CREATE_ID = new InjectionToken&lt;() =&gt; string&gt;('CREATE_ID');
+{ provide: CREATE_ID, useFactory: () =&gt; () =&gt; Math.random().toString(36).slice(2) }
+
+constructor(@Inject(CREATE_ID) private createId: () =&gt; string) {
+  console.log('Nuevo id:', this.createId());
+}
+</code></pre>
+            </div>
+            <div class="tip">Tip: Tokens documentan la intención y evitan colisiones en grandes apps o librerías.</div>
+        </section>
+
+    </main>
+</body>
+</html>
